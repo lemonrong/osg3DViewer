@@ -118,12 +118,12 @@ int main(int argc, char *argv[])
     //    sScreen.show();
     //}
 
-    //MainWindow w;
-    //QObject::connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
+    MainWindow w;
+    QObject::connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
-    //w.show();
+    w.show();
 
-    //w.loadFile(filename);
+    w.loadFile(filename);
 
     return app.exec();
 }

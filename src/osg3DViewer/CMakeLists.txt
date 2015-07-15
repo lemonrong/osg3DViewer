@@ -25,15 +25,16 @@ SET(TRANSLATIONS
 SET(RESOURCES
     ${resource_file_list}
 )
-INCLUDE_DIRECTORIES(include "./")
+
 
 # qt4 definitinos
-QT4_WRAP_UI         ( APP_UIS_H ${UIS} )
+QT4_WRAP_UI         ( APP_UIS_H  ${UIS} )
 QT4_WRAP_CPP        ( APP_MOC_SRCS ${HEADERS} )
 QT4_ADD_RESOURCES   ( APP_RESOURCES ${RESOURCES} )
-QT4_AUTOMOC         ( ${SOURCES} )
+#QT4_AUTOMOC         ( ${SOURCES} )
 QT4_ADD_TRANSLATION ( APP_QM ${TRANSLATIONS} )
 
+INCLUDE_DIRECTORIES(include "./" ${PROJECT_BINARY_DIR}/src/${PROJECT_NAME})
 
 # resource compilation for MinGW
 IF( MINGW )
