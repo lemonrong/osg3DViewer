@@ -28,7 +28,7 @@
 #include <QtCore/QModelIndex>
 #include <osg/Node>
 
-class xOsgWindow;
+class xSceneView;
 #include "ui_MainWindow.h"
 class MainWindow : public QMainWindow
 {
@@ -45,8 +45,6 @@ public slots:
     void on_actionQuit_triggered();
     void on_actionOpen_triggered();
 	void on_actionUnload_triggered();
-
-protected:
     void recentFileActivated(QAction *action);
     void setupRecentFilesMenu();
 
@@ -72,7 +70,7 @@ private:
 private:
 	Ui::MainWindow ui;
 	osg::ref_ptr<osg::Node> m_rootNode;
-	xOsgWindow *m_pOsgWindow;
+	xSceneView *m_pSceneView;
 
     // variables
 	QString m_currFile;

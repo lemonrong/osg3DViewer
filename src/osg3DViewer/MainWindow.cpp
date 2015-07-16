@@ -44,7 +44,7 @@
 #include <QtGui/QMatrix4x4>
 #include <QtGui/QGridLayout>
 #include <osgDB/ReadFile>
-#include "xOsgWindow.h"
+#include "xSceneView.h"
 //#include "OsgTreeModel.h"
 //#include "SceneView.h"
 //#include "SceneModel.h"
@@ -105,8 +105,8 @@ MainWindow::MainWindow(QWidget *parent)
 	grid->setSpacing(0);
 	ui.centralwidget->setLayout(grid);
 
-	m_pOsgWindow = new xOsgWindow(ui.centralwidget);
-	grid->addWidget(m_pOsgWindow, 0, 0);
+	m_pSceneView = new xSceneView(ui.centralwidget);
+	grid->addWidget(m_pSceneView, 0, 0);
 	loadSettings();
     updateUi();
 }
@@ -189,7 +189,7 @@ bool MainWindow::loadFile(const QString &file)
         return false;
 
 	m_rootNode = osgDB::readNodeFile(file.toStdString());
-	m_pOsgWindow->setSceneData(m_rootNode);
+	m_pSceneView->setSceneData(m_rootNode);
     //saveIfNeeded();
 
     //QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
@@ -356,7 +356,7 @@ void MainWindow::on_actionUnload_triggered()
     //    return; // cancel triggered !!
     //}
 
-    m_pOsgWindow->setSceneData(NULL);
+    m_pSceneView->setSceneData(NULL);
 
     //// disable actions because no more current file !!
     //enableActions(false);

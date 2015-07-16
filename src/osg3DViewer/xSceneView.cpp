@@ -17,7 +17,7 @@
 
  *******************************************************************************/
 
-#include "xOsgWindow.h"
+#include "xSceneView.h"
 #include <QtGui/QGridLayout>
 
 #include <osgDB/WriteFile>
@@ -29,7 +29,7 @@ const unsigned int idleRefreshPeriod = 60;
 
 //------------------------------------------------------------------------------------------------------------
 
-xOsgWindow::xOsgWindow(QWidget *parent) : QWidget(parent), m_refreshPeriod(defaultRefreshPeriod)
+xSceneView::xSceneView(QWidget *parent) : QWidget(parent), m_refreshPeriod(defaultRefreshPeriod)
 {
 	setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);	
 
@@ -47,7 +47,7 @@ xOsgWindow::xOsgWindow(QWidget *parent) : QWidget(parent), m_refreshPeriod(defau
 	m_timer.start(m_refreshPeriod);
 }
 
-QWidget* xOsgWindow::addViewWidget(osgQt::GraphicsWindowQt* gw, osg::Node* scene)
+QWidget* xSceneView::addViewWidget(osgQt::GraphicsWindowQt* gw, osg::Node* scene)
 {
 	m_view = new osgViewer::View;
 	addView(m_view.get());
@@ -69,7 +69,7 @@ QWidget* xOsgWindow::addViewWidget(osgQt::GraphicsWindowQt* gw, osg::Node* scene
 	gw->setTouchEventsEnabled(true);
 	return gw->getGLWidget();
 }
-osgQt::GraphicsWindowQt* xOsgWindow::createGraphicsWindow( int x, int y, int w, int h, const std::string& name, bool windowDecoration)
+osgQt::GraphicsWindowQt* xSceneView::createGraphicsWindow( int x, int y, int w, int h, const std::string& name, bool windowDecoration)
 {
 	osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
@@ -88,12 +88,12 @@ osgQt::GraphicsWindowQt* xOsgWindow::createGraphicsWindow( int x, int y, int w, 
 	return new osgQt::GraphicsWindowQt(traits.get());
 }
 
-void xOsgWindow::setRefreshPeriod(unsigned int period)
+void xSceneView::setRefreshPeriod(unsigned int period)
 {
 	m_refreshPeriod = period;
 }
 
-void xOsgWindow::setIdle(bool val)
+void xSceneView::setIdle(bool val)
 {
 	if (val)
 		m_timer.start(idleRefreshPeriod);
@@ -101,12 +101,12 @@ void xOsgWindow::setIdle(bool val)
 		m_timer.start(defaultRefreshPeriod);
 }
 
-void xOsgWindow::setSceneData(osg::Node *node)
+void xSceneView::setSceneData(osg::Node *node)
 {
 	m_view->setSceneData(node);
 }
 
-//void xOsgWindow::takeSnapshot()
+//void xSceneView::takeSnapshot()
 //{}
 
 

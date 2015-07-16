@@ -28,12 +28,12 @@
 #include <osgGA/StateSetManipulator>
 #include <osgQt/GraphicsWindowQt>
 
-class xOsgWindow : public QWidget, public osgViewer::CompositeViewer
+class xSceneView : public QWidget, public osgViewer::CompositeViewer
 {
 public:
 
-	xOsgWindow(QWidget *parent = NULL);
-	virtual ~xOsgWindow(void) {}
+	xSceneView(QWidget *parent = NULL);
+	virtual ~xSceneView(void) {}
 
 	void setRefreshPeriod(unsigned int period);
 	void setIdle(bool val);
