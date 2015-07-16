@@ -62,6 +62,8 @@ signals:
     void newFileToLoad(const QString &);
 
 private:
+	void saveSettings();
+	void loadSettings();
     void addRecentlyOpenedFile(const QString &fn, QStringList &lst);
     void updateUi();
     void enableActions(bool);
@@ -73,6 +75,7 @@ private:
 	xOsgWindow *m_pOsgWindow;
 
     // variables
+	QString m_currFile;
     QString m_lastDirectory;
 
     // recent files

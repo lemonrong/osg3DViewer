@@ -26,7 +26,7 @@
 #else
 #include <unistd.h>
 #endif
-
+#include <QtCore/QSettings>
 #include <QtCore/QProcess>
 #include <QtCore/QFileInfo>
 #include <QtCore/QSettings>
@@ -61,7 +61,9 @@
 //
 //#include "FindNameListVisitor.h"
 
-
+#define PACKAGE_ORGANIZATION "Lemon Rong"
+#define PACKAGE_NAME "osg3DViewer"
+#define PACKAGE_VERSION "1.0.0"
 
 const int maxRecentlyOpenedFile = 10;
 
@@ -105,11 +107,13 @@ MainWindow::MainWindow(QWidget *parent)
 
 	m_pOsgWindow = new xOsgWindow(ui.centralwidget);
 	grid->addWidget(m_pOsgWindow, 0, 0);
+	loadSettings();
     updateUi();
 }
 
 MainWindow::~MainWindow()
 {
+	saveSettings();
 }
 
 void MainWindow::updateUi()
@@ -119,7 +123,7 @@ void MainWindow::updateUi()
 
     //// prepare recent files menu ...
     //connect( ui->menuFile, SIGNAL( aboutToShow() ), this, SLOT( setupRecentFilesMenu() ) );
-    //connect( ui->menuRecentlyOpenedFiles, SIGNAL( triggered(QAction*) ), this, SLOT( recentFileActivated(QAction*) ) );
+    connect(ui.menuRecent_Files, SIGNAL(triggered(QAction*)), this, SLOT( recentFileActivated(QAction*)));
 
     //// create the log handler
     //connect( LogHandler::getInstance(),SIGNAL( newMessage(const QString &) ),this,SLOT( printToLog(const QString &) ) );
@@ -175,12 +179,7 @@ void MainWindow::on_actionQuit_triggered()
 
 void MainWindow::on_actionOpen_triggered()
 {
-    QString file = QFileDialog::getOpenFileName(
-        this,
-        "Select one file to open",
-        m_lastDirectory,
-        "OSG files (*.*)");
-
+    QString file = QFileDialog::getOpenFileName(this, "Select one file to open", m_lastDirectory, "OSG files (*.*)");
     loadFile(file);
 }
 
@@ -195,9 +194,10 @@ bool MainWindow::loadFile(const QString &file)
 
     //QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
 
-    //m_currFile = file;
-    //m_lastDirectory = QFileInfo(file).absolutePath();
-
+    m_currFile = file;
+    m_lastDirectory = QFileInfo(file).absolutePath();
+	addRecentlyOpenedFile(m_currFile, m_recentFiles);
+	setupRecentFilesMenu();
     //// enable actions
     //enableActions(false);
 
@@ -221,27 +221,27 @@ void MainWindow::addRecentlyOpenedFile(const QString &fn, QStringList &lst)
 
 void MainWindow::setupRecentFilesMenu()
 {
-    //ui->menuRecentlyOpenedFiles->clear();
+    ui.menuRecent_Files->clear();
 
-    //if (m_recentFiles.count() > 0)
-    //{
-    //    ui->menuRecentlyOpenedFiles->setEnabled(true);
-    //    QStringList::Iterator it = m_recentFiles.begin();
+    if (m_recentFiles.count() > 0)
+    {
+        ui.menuRecent_Files->setEnabled(true);
+        QStringList::Iterator it = m_recentFiles.begin();
 
-    //    for (; it != m_recentFiles.end(); ++it)
-    //        ui->menuRecentlyOpenedFiles->addAction(*it);
-    //}
-    //else
-    //{
-    //    ui->menuRecentlyOpenedFiles->setEnabled(false);
-    //}
+        for (; it != m_recentFiles.end(); ++it)
+             ui.menuRecent_Files->addAction(*it);
+    }
+    else
+    {
+         ui.menuRecent_Files->setEnabled(false);
+    }
 }
 
 void MainWindow::recentFileActivated(QAction *action)
 {
-    if ( !action->text().isEmpty() )
+    if (!action->text().isEmpty())
     {
-        loadFile( action->text() );
+        loadFile(action->text());
     }
 }
 
@@ -270,7 +270,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
     const QMimeData* mimeData = event->mimeData();
 
-    if ( !mimeData->hasUrls() )
+    if (!mimeData->hasUrls())
     {
         event->ignore();
         return;
@@ -288,13 +288,13 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
     QString filename = url.toLocalFile();
 
     // We don't test extension
-    if ( !QFileInfo(filename).exists() )
+    if (!QFileInfo(filename).exists())
     {
         event->ignore();
         return;
     }
 
-    if ( !QFileInfo(filename).isFile() )
+    if (!QFileInfo(filename).isFile())
     {
         event->ignore();
         return;
@@ -305,7 +305,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 
 void MainWindow::dragMoveEvent(QDragMoveEvent *event)
 {
-    if ( event->source() == this )
+    if (event->source() == this)
     {
         event->setDropAction(Qt::MoveAction);
         event->accept();
@@ -323,7 +323,7 @@ void MainWindow::dropEvent(QDropEvent *event)
     QUrl url = urls.at(0);
 
     QString filename = url.toLocalFile();
-    loadFile( filename );
+    loadFile(filename);
 }
 
 //-------------------------------------------------------------------------------
@@ -356,9 +356,89 @@ void MainWindow::on_actionUnload_triggered()
     //    return; // cancel triggered !!
     //}
 
-    //resetViews(true);
+    m_pOsgWindow->setSceneData(NULL);
 
     //// disable actions because no more current file !!
     //enableActions(false);
 }
 
+void MainWindow::saveSettings()
+{
+	QSettings settings(PACKAGE_ORGANIZATION, PACKAGE_NAME);
+
+	settings.beginGroup("MainWindow");
+	settings.setValue( "MainWindowState",saveState(0) );
+	settings.setValue("size", size());
+	settings.setValue("pos", pos());
+	settings.setValue("fullScreen", isFullScreen());
+	settings.endGroup();
+
+	settings.beginGroup("Application");
+
+	settings.setValue("lastDirectory", m_lastDirectory);
+	//settings.setValue("lastDirectorySnapshot", m_lastDirectorySnapshot);
+
+	//settings.setValue("currentLanguage", m_currentLanguage);
+
+	//settings.setValue("resetConfig", m_resetConfig);
+	//settings.setValue("watermark", m_watermark);
+	//settings.setValue("inverseMouseWheel", m_inverseMouseWheel);
+	//settings.setValue("displayTrackballHelper", m_displayTrackballHelper);
+
+	//settings.setValue("splashscreenAtStartup", m_splashscreenAtStartup);
+	//settings.setValue("splashscreenTransparentBackground", m_splashscreenTransparentBackground);
+
+	// recent files
+	settings.setValue("recentlyOpenedFiles", m_recentFiles);
+
+	// scene background
+	//settings.setValue( "bgcolor", ui->widgetSceneView->getBgColor() );
+
+	settings.endGroup();
+}
+
+void MainWindow::loadSettings()
+{
+	QSettings settings(PACKAGE_ORGANIZATION, PACKAGE_NAME);
+
+	settings.beginGroup("MainWindow");
+
+	restoreState(settings.value("MainWindowState").toByteArray(), 0);
+
+	resize(settings.value( "size", QSize(600, 600)).toSize());
+	move(settings.value( "pos", QPoint(200, 200)).toPoint());
+
+	bool fullScreen = settings.value("fullScreen",false).toBool();
+	if (fullScreen)
+		showFullScreen();
+	settings.endGroup();
+
+	settings.beginGroup("Application");
+	m_lastDirectory = settings.value("lastDirectory","/home").toString();
+	//m_lastDirectorySnapshot = settings.value("lastDirectorySnapshot","/home").toString();
+
+	// recent files
+	m_recentFiles = settings.value( "recentlyOpenedFiles").toStringList();
+
+	//m_splashscreenAtStartup = settings.value( "splashscreenAtStartup", true).toBool();
+	//m_splashscreenTransparentBackground = settings.value("splashscreenTransparentBackground",true).toBool();
+
+	//m_resetConfig = settings.value("resetConfig", false).toBool();
+	//m_watermark = settings.value("watermark", true).toBool();
+	//m_inverseMouseWheel = settings.value("inverseMouseWheel", false).toBool();
+	//ui->widgetSceneView->setEnabledInverseMouseWheel(m_inverseMouseWheel);
+
+	//m_displayTrackballHelper = settings.value("displayTrackballHelper", false).toBool();
+	//ui->widgetSceneView->setEnabledTrackbalHelper(m_displayTrackballHelper);
+
+	//m_currentLanguage = settings.value("currentLanguage","").toString();
+
+	//if ( m_currentLanguage.isEmpty() )
+	//	m_currentLanguage = QLocale::system().name().left(2);
+
+	//// scene background
+	//QColor color = settings.value( "bgcolor",QColor(50,50,50) ).value<QColor>();
+	//ui->widgetSceneView->setBgColor(color);
+
+	settings.endGroup();
+}

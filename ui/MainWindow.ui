@@ -3,6 +3,9 @@
  <author>lemonrong</author>
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -10,6 +13,9 @@
     <width>799</width>
     <height>600</height>
    </rect>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
   </property>
   <property name="windowTitle">
    <string>osg3DViewer</string>
@@ -28,11 +34,16 @@
     <property name="title">
      <string>File</string>
     </property>
+    <widget class="QMenu" name="menuRecent_Files">
+     <property name="title">
+      <string>Recent Files</string>
+     </property>
+    </widget>
     <addaction name="actionOpen"/>
     <addaction name="actionUnload"/>
     <addaction name="actionSave_As"/>
     <addaction name="separator"/>
-    <addaction name="actionRecent_Files"/>
+    <addaction name="menuRecent_Files"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -89,11 +100,6 @@
    </property>
    <property name="text">
     <string>Quit</string>
-   </property>
-  </action>
-  <action name="actionRecent_Files">
-   <property name="text">
-    <string>Recent Files</string>
    </property>
   </action>
  </widget>
