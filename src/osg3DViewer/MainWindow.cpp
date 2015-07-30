@@ -44,10 +44,11 @@
 #include <QtGui/QMatrix4x4>
 #include <QtGui/QGridLayout>
 #include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
 #include "xSceneView.h"
-//#include "OsgTreeModel.h"
-//#include "SceneView.h"
-//#include "SceneModel.h"
+#include "xTreeModel.h"
+#include "xTreeView.h"
+
 //#include "PreferencesWidget.h"
 //#include "ThreadPool.h"
 //#include "ObjectLoader.h"
@@ -68,7 +69,9 @@
 const int maxRecentlyOpenedFile = 10;
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent),
+	m_pTreeModel(NULL),
+	m_pTreeView(NULL)
     //m_currentSnapshotNum(0),
     //m_lastSnapshotName("snapshot"),
     //m_appName(PACKAGE_NAME),
@@ -83,7 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
     //m_inverseMouseWheel(false),
     //m_displayTrackballHelper(false),
     //m_optimize(false),
-    //m_treeModel(NULL),
+    
     //m_sceneModel(NULL),
     //m_LODFactorLabel(NULL),
     //m_LODFactor(1.0f),
@@ -118,12 +121,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::updateUi()
 {
-    //// setup app name, release, ...
-    //updateApplicationIdentity();
+    // setup app name, release, ...
+    updateApplicationIdentity();
 
-    //// prepare recent files menu ...
-    //connect( ui->menuFile, SIGNAL( aboutToShow() ), this, SLOT( setupRecentFilesMenu() ) );
-    connect(ui.menuRecent_Files, SIGNAL(triggered(QAction*)), this, SLOT( recentFileActivated(QAction*)));
+    // prepare recent files menu ...
+    connect(ui.menuFile, SIGNAL(aboutToShow()), this, SLOT(setupRecentFilesMenu()));
+    connect(ui.menuRecent_Files, SIGNAL(triggered(QAction*)), this, SLOT(recentFileActivated(QAction*)));
 
     //// create the log handler
     //connect( LogHandler::getInstance(),SIGNAL( newMessage(const QString &) ),this,SLOT( printToLog(const QString &) ) );
@@ -133,9 +136,14 @@ void MainWindow::updateUi()
     //// limit log display
     //ui->textBrowserLog->document()->setMaximumBlockCount(1000);
 
-    //// create tree model
-    //m_treeModel = new OsgTreeModel(this);
-    //ui->treeViewStructure->setModel(m_treeModel);
+    // create tree model
+    m_pTreeModel = new xTreeModel(this);
+	m_pTreeView = new xTreeView(this);
+	m_pTreeView->setModel(m_pTreeModel);
+	//QVBoxLayout *pTreeWidgetLayout = new QVBoxLayout(this);
+	
+	ui.dockWidget_Model->setWidget(m_pTreeView);
+	//pTreeWidgetLayout->addWidget(m_pTreeView);
     //connect( ui->treeViewStructure, SIGNAL( clicked ( const QModelIndex &) ), this, SLOT( nodeSelected(const QModelIndex & ) ) );
 
     //enableActions(false);
@@ -182,7 +190,12 @@ void MainWindow::on_actionOpen_triggered()
     QString file = QFileDialog::getOpenFileName(this, "Select one file to open", m_lastDirectory, "OSG files (*.*)");
     loadFile(file);
 }
+void MainWindow::on_actionSave_As_triggered()
+{
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), m_lastDirectory, tr("OSG files (*.*)"));
 
+	osgDB::writeNodeFile(*m_rootNode.get(), fileName.toStdString());
+}
 bool MainWindow::loadFile(const QString &file)
 {
     if ( file.isEmpty() || !QFileInfo(file).exists() )
@@ -190,6 +203,7 @@ bool MainWindow::loadFile(const QString &file)
 
 	m_rootNode = osgDB::readNodeFile(file.toStdString());
 	m_pSceneView->setSceneData(m_rootNode);
+	m_pTreeModel->setNode(m_rootNode);
     //saveIfNeeded();
 
     //QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
@@ -342,10 +356,13 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::updateApplicationIdentity()
 {
-    //setWindowTitle(m_appName + " " + m_version);
-    //QApplication::setApplicationName(m_appName);
-    //QApplication::setApplicationVersion(m_version);
-    //QApplication::setOrganizationName(PACKAGE_ORGANIZATION);
+	QString strTitle = PACKAGE_NAME;
+	strTitle += " ";
+	strTitle += PACKAGE_VERSION;
+    setWindowTitle(strTitle);
+    QApplication::setApplicationName(PACKAGE_NAME);
+    QApplication::setApplicationVersion(PACKAGE_VERSION);
+    QApplication::setOrganizationName(PACKAGE_ORGANIZATION);
 }
 
 void MainWindow::on_actionUnload_triggered()

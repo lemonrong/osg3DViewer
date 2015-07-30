@@ -29,6 +29,8 @@
 #include <osg/Node>
 
 class xSceneView;
+class xTreeModel;
+class xTreeView;
 #include "ui_MainWindow.h"
 class MainWindow : public QMainWindow
 {
@@ -45,6 +47,7 @@ public slots:
     void on_actionQuit_triggered();
     void on_actionOpen_triggered();
 	void on_actionUnload_triggered();
+	void on_actionSave_As_triggered();
     void recentFileActivated(QAction *action);
     void setupRecentFilesMenu();
 
@@ -71,6 +74,9 @@ private:
 	Ui::MainWindow ui;
 	osg::ref_ptr<osg::Node> m_rootNode;
 	xSceneView *m_pSceneView;
+
+	xTreeModel *m_pTreeModel;
+	xTreeView *m_pTreeView;
 
     // variables
 	QString m_currFile;

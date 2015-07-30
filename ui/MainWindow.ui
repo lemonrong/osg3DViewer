@@ -66,6 +66,26 @@
    <addaction name="separator"/>
    <addaction name="actionQuit"/>
   </widget>
+  <widget class="QDockWidget" name="dockWidget_Model">
+   <property name="windowTitle">
+    <string>Model Structure</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout"/>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_Properties">
+   <property name="windowTitle">
+    <string>Properties</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2"/>
+  </widget>
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="../res/osg3DViewer.qrc">

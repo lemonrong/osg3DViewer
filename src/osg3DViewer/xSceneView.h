@@ -31,7 +31,6 @@
 class xSceneView : public QWidget, public osgViewer::CompositeViewer
 {
 public:
-
 	xSceneView(QWidget *parent = NULL);
 	virtual ~xSceneView(void) {}
 
