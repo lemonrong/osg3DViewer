@@ -184,7 +184,7 @@ QVariant xTreeModel::data(const QModelIndex &index, int role) const
         {
             QString description;
 
-            for (size_t i = 0; node->getNumDescriptions(); i++)
+            for (size_t i = 0; i<node->getNumDescriptions(); i++)
                 description += QString::fromStdString(node->getDescription(i)) + "\n";
         }
     }
