@@ -31,7 +31,8 @@ const unsigned int idleRefreshPeriod = 60;
 
 xSceneView::xSceneView(QWidget *parent) : QWidget(parent), m_refreshPeriod(defaultRefreshPeriod)
 {
-	setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);	
+	setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
+	setKeyEventSetsDone(0);
 
 	QWidget* widget = addViewWidget(createGraphicsWindow(0,0,100,100), NULL);
 
