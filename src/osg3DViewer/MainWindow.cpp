@@ -374,6 +374,7 @@ void MainWindow::on_actionUnload_triggered()
     //}
 
     m_pSceneView->setSceneData(NULL);
+	m_pTreeModel->setNode(NULL);
 
     //// disable actions because no more current file !!
     //enableActions(false);
