@@ -263,10 +263,10 @@ void MainWindow::recentFileActivated(QAction *action)
 void MainWindow::enableActions(bool val)
 {
     //ui->actionSnapShot->setEnabled(val);
-    //ui->actionResetView->setEnabled(val);
-    //ui->actionTexture->setEnabled(val);
-    //ui->actionLight->setEnabled(val);
-    //ui->actionHighLight->setEnabled(val);
+    ui.actionReset_View->setEnabled(val);
+    ui.actionTexture->setEnabled(val);
+    ui.actionLight->setEnabled(val);
+    ui.actionHighLight->setEnabled(val);
     //ui->actionBackFace->setEnabled(val);
     //ui->actionIncreaseLOD->setEnabled(val);
     //ui->actionDecreaseLOD->setEnabled(val);
@@ -459,4 +459,40 @@ void MainWindow::loadSettings()
 	//ui->widgetSceneView->setBgColor(color);
 
 	settings.endGroup();
+}
+
+void MainWindow::on_actionReset_View_triggered()
+{
+	m_pSceneView->home();
+}
+
+void MainWindow::on_actionShadow_triggered(bool val)
+{
+	m_pSceneView->setShadowEnabled(val);
+}
+
+void MainWindow::on_actionTexture_triggered(bool val)
+{
+	//if (val)
+	//{
+	//	m_keepCompassState = ui->widgetSceneView->isCompassEnabled();
+	//	ui->widgetSceneView->setCompassEnabled(false);
+	//}
+	//else
+	//{
+	//	ui->widgetSceneView->setCompassEnabled(m_keepCompassState);
+	//}
+
+	//ui->actionCompass->setEnabled(!val);
+	m_pSceneView->setTextureEnabled(!val);
+}
+
+void MainWindow::on_actionLight_triggered(bool val)
+{
+	m_pSceneView->setLightingEnabled(!val);
+}
+
+void MainWindow::on_actionHighLight_triggered(bool val)
+{
+	//m_pSceneView->setHighlightScene(val);
 }

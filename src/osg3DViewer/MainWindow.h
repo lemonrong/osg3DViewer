@@ -51,6 +51,12 @@ public slots:
     void recentFileActivated(QAction *action);
     void setupRecentFilesMenu();
 
+	void on_actionReset_View_triggered();
+	void on_actionTexture_triggered(bool val);
+	void on_actionLight_triggered(bool val);
+	void on_actionHighLight_triggered(bool val);
+	void on_actionShadow_triggered(bool val);
+
 protected slots:
 
     void dragEnterEvent(QDragEnterEvent *event);

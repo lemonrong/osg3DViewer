@@ -24,8 +24,17 @@
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/MultiTouchTrackballManipulator>
 
+#include <osgShadow/ShadowMap>
+#include <osgShadow/SoftShadowMap>
+#include <osgShadow/ParallelSplitShadowMap>
+#include <osgShadow/LightSpacePerspectiveShadowMap>
+#include <osgShadow/StandardShadowMap>
+
 const unsigned int defaultRefreshPeriod = 30;
 const unsigned int idleRefreshPeriod = 60;
+
+const int receivesShadowTraversalMask = 0x1;
+const int castsShadowTraversalMask = 0x2;
 
 //------------------------------------------------------------------------------------------------------------
 
@@ -46,6 +55,13 @@ xSceneView::xSceneView(QWidget *parent) : QWidget(parent), m_refreshPeriod(defau
 
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
 	m_timer.start(m_refreshPeriod);
+
+	createSceneEnvironnement();
+
+	// by default all stateset are enabled
+	//setBackfaceEnabled(true);
+	//setLightingEnabled(true);
+	//setTextureEnabled(true);
 }
 
 QWidget* xSceneView::addViewWidget(osgQt::GraphicsWindowQt* gw, osg::Node* scene)
@@ -64,8 +80,8 @@ QWidget* xSceneView::addViewWidget(osgQt::GraphicsWindowQt* gw, osg::Node* scene
 
 	m_view->setSceneData(scene);
 	m_view->addEventHandler(new osgViewer::StatsHandler);
-	m_statesetManipulator = new osgGA::StateSetManipulator(m_camera->getOrCreateStateSet());
-	m_view->addEventHandler(m_statesetManipulator);
+	m_pStatesetManipulator = new osgGA::StateSetManipulator(m_camera->getOrCreateStateSet());
+	m_view->addEventHandler(m_pStatesetManipulator);
 	m_view->setCameraManipulator(new osgGA::MultiTouchTrackballManipulator);
 	gw->setTouchEventsEnabled(true);
 	return gw->getGLWidget();
@@ -102,13 +118,131 @@ void xSceneView::setIdle(bool val)
 		m_timer.start(defaultRefreshPeriod);
 }
 
+void xSceneView::createSceneEnvironnement()
+{
+	m_scene = new osg::Group(); // root node
+	m_scene->setName("sceneGroup");
+
+	// Create a clear Node
+
+	//m_clearColor = osg::Vec4f(0.33f,0.33f,0.33f,1.0f);
+	//m_backdrop = new osg::ClearNode;
+	//m_backdrop->setName("backdrop");
+	//m_backdrop->setClearColor(m_clearColor);
+	//m_scene->addChild(m_backdrop);
+
+	//// create and attach the gradient background
+	//m_gradientBackground = createBackground();
+	//m_scene->addChild(m_gradientBackground);
+
+	// Attach the switch containing the root nodes
+	m_rootNodes = new osgShadow::ShadowedScene();
+	m_rootNodes->setReceivesShadowTraversalMask(receivesShadowTraversalMask);
+	m_rootNodes->setCastsShadowTraversalMask(castsShadowTraversalMask);
+	m_rootNodes->setDataVariance( osg::Object::DYNAMIC );
+
+	m_scene->addChild(m_rootNodes);
+
+	//m_grid = makeGrid();
+	//m_scene->addChild(m_grid);
+	//m_axis = makeAxis();
+	//m_scene->addChild(m_axis);
+
+	//// hide by default
+	//m_grid->setNodeMask(0x0);
+	//m_axis->setNodeMask(0x0);
+
+	// for compass
+	//m_cameraCompass = createCompass();
+	//m_scene->addChild(m_cameraCompass);
+
+	//createPivotManipulator();
+
+	m_view->setSceneData(m_scene);
+}
+
 void xSceneView::setSceneData(osg::Node *node)
 {
-	m_view->setSceneData(node);
+	//m_view->setSceneData(node);
+	m_rootNodes->removeChild(0, m_rootNodes->getNumChildren());
+	m_rootNodes->addChild(node);
+
+	m_view->getCameraManipulator()->setAutoComputeHomePosition(false);
+
+	m_rootNodes->dirtyBound();
+
+	// save the current bbox;
+	//ExtentsVisitor ext;
+	//node->accept(ext);
+
+	osg::BoundingSphere bound = m_rootNodes->getBound();
+
+	m_view->getCameraManipulator()->setHomePosition( bound.center() + osg::Vec3( 1.5f * bound.radius(),1.5f * bound.radius(),1.5f * bound.radius()),
+		bound.center(),	osg::Vec3(0.0f,0.0f,1.0f));
+	m_view->home();
 }
 
 //void xSceneView::takeSnapshot()
 //{}
 
+void xSceneView::setShadowEnabled(bool val)
+{
+	
+	if (val)
+	{
+		int alg = 3;
+		const osg::BoundingSphere& bs = m_rootNodes->getBound();
 
+		// test bidon pour modifier l'algo d'ombrage en fonction de la taille de l'objet
+		if (alg == 0)
+		{
+			osg::ref_ptr<osgShadow::ParallelSplitShadowMap> pssm = new osgShadow::ParallelSplitShadowMap(NULL,5);
+			pssm->setTextureResolution(2048);
+			m_rootNodes->setShadowTechnique(pssm.get());
 
+			// blindage mais je ne sais pas trop pourquoi ?!?
+			pssm->init();
+		}
+		else if (alg == 2)
+		{
+			osg::ref_ptr<osgShadow::SoftShadowMap> pssm = new osgShadow::SoftShadowMap();
+
+			pssm->setTextureSize( osg::Vec2s(2048,2048) );
+
+			//pssm->setTextureResolution(2048);
+			m_rootNodes->setShadowTechnique(pssm.get());
+
+			// blindage mais je ne sais pas trop pourquoi ?!?
+			pssm->init();
+		}
+		else if (alg == 3)
+		{
+			osg::ref_ptr<osgShadow::MinimalShadowMap> pssm = new osgShadow::LightSpacePerspectiveShadowMapDB();
+
+			pssm->setTextureSize(osg::Vec2s(2048,2048));
+
+			//pssm->setTextureResolution(2048);
+			m_rootNodes->setShadowTechnique(pssm.get());
+
+			// blindage mais je ne sais pas trop pourquoi ?!?
+			pssm->init();
+		}
+	}
+	else
+	{
+		m_rootNodes->setShadowTechnique(NULL);
+	}
+}
+
+void xSceneView::home()
+{
+	//osg::Vec3d eye;
+	//osg::Vec3d center;
+	//osg::Vec3d up;
+
+	// reset the pivot center point
+	//m_view->getCameraManipulator()->getHomePosition(eye, center, up);
+	//recenterPivotPoint( center.x(),center.y(),center.z() );
+
+	m_view->home();
+}

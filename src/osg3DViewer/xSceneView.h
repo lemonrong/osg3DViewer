@@ -27,6 +27,7 @@
 #include <osgViewer/CompositeViewer>
 #include <osgGA/StateSetManipulator>
 #include <osgQt/GraphicsWindowQt>
+#include <osgShadow/ShadowedScene>
 
 class xSceneView : public QWidget, public osgViewer::CompositeViewer
 {
@@ -38,16 +39,33 @@ public:
 	void setIdle(bool val);
 	void setSceneData(osg::Node *);
 
+	void setLightingEnabled(bool bLightingOn) { m_pStatesetManipulator->setLightingEnabled(bLightingOn);}
+	bool getLightingEnabled() const {return m_pStatesetManipulator->getLightingEnabled(); }
+
+	void setTextureEnabled(bool bTextureOn) {m_pStatesetManipulator->setTextureEnabled(bTextureOn); }
+	bool getTextureEnabled() const {return m_pStatesetManipulator->getTextureEnabled(); }
+
+	void setShadowEnabled(bool val);
+	void home();
+
 protected:
 	QWidget* addViewWidget(osgQt::GraphicsWindowQt* gw, osg::Node* scene);
 	osgQt::GraphicsWindowQt* createGraphicsWindow(int x, int y, int w, int h, const std::string& name="", bool windowDecoration=false);
 	virtual void paintEvent( QPaintEvent* /* event */ )  { frame(); }
 
+private:
+	void createSceneEnvironnement();
+
+private:
 	QTimer m_timer;
 	unsigned int m_refreshPeriod;
 	osg::ref_ptr<osg::Camera> m_camera;
 	osg::ref_ptr<osgViewer::View> m_view;
-	osg::ref_ptr<osgGA::StateSetManipulator> m_statesetManipulator;
+	osg::ref_ptr<osgGA::StateSetManipulator> m_pStatesetManipulator;
+
+	// root node of the model
+	osg::ref_ptr<osg::Group> m_scene;
+	osg::ref_ptr<osgShadow::ShadowedScene> m_rootNodes;
 };
 
 #endif 
