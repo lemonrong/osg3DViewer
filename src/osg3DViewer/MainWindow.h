@@ -29,9 +29,12 @@
 #include <osg/Node>
 
 class xSceneView;
+class xSceneModel;
 class xTreeModel;
 class xTreeView;
+
 #include "ui_MainWindow.h"
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -80,6 +83,7 @@ private:
 	Ui::MainWindow ui;
 	osg::ref_ptr<osg::Node> m_rootNode;
 	xSceneView *m_pSceneView;
+	xSceneModel *m_pSceneModel;
 
 	xTreeModel *m_pTreeModel;
 	xTreeView *m_pTreeView;

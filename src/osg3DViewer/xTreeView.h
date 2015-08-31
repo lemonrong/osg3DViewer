@@ -17,8 +17,8 @@
 
  *******************************************************************************/
 
-#ifndef _XTREEVIEW_H_
-#define _XTREEVIEW_H_
+#ifndef _OSGVIEWER_XTREEVIEW_H_
+#define _OSGVIEWER_XTREEVIEW_H_
 #pragma once
 
 #include <QTreeView>

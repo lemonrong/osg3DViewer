@@ -46,6 +46,7 @@
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
 #include "xSceneView.h"
+#include "xSceneModel.h"
 #include "xTreeModel.h"
 #include "xTreeView.h"
 
@@ -71,7 +72,7 @@ const int maxRecentlyOpenedFile = 10;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
 	m_pTreeModel(NULL),
-	m_pTreeView(NULL)
+	m_pTreeView(NULL),
     //m_currentSnapshotNum(0),
     //m_lastSnapshotName("snapshot"),
     //m_appName(PACKAGE_NAME),
@@ -87,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent)
     //m_displayTrackballHelper(false),
     //m_optimize(false),
     
-    //m_sceneModel(NULL),
+    m_pSceneModel(NULL)
     //m_LODFactorLabel(NULL),
     //m_LODFactor(1.0f),
     //m_prefs(NULL),
@@ -142,6 +143,7 @@ void MainWindow::updateUi()
 	m_pTreeView->setModel(m_pTreeModel);
 	//QVBoxLayout *pTreeWidgetLayout = new QVBoxLayout(this);
 	
+
 	ui.dockWidget_Model->setWidget(m_pTreeView);
 	//pTreeWidgetLayout->addWidget(m_pTreeView);
     //connect( ui->treeViewStructure, SIGNAL( clicked ( const QModelIndex &) ), this, SLOT( nodeSelected(const QModelIndex & ) ) );
@@ -149,9 +151,12 @@ void MainWindow::updateUi()
     //enableActions(false);
 
     //// create the scene manager (scene model)
+	m_pSceneModel = new xSceneModel(this);
+	m_pSceneView->setModel(m_pSceneModel);
+	connect(m_pSceneModel, SIGNAL(sigUpdateModel()), m_pSceneView, SLOT(slotUpdateModel()), Qt::UniqueConnection);
     //m_sceneModel = new SceneModel(this);
     //ui->widgetSceneView->setModel(m_sceneModel);
-
+	
     //connect(ui->widgetSceneView,SIGNAL( newScreenshotAvailable(osg::Image *) ),this,SLOT( takeIntoAccountScreenshot(osg::Image*) ),Qt::QueuedConnection);
     //connect( ui->widgetSceneView, SIGNAL( picked(osg::Drawable*) ), this, SLOT( selectTreeItem(osg::Drawable*) ) );
     //connect( ui->widgetSceneView, SIGNAL( newAspectRatio(const QSize &) ), this, SLOT( changeAspectRatio(const QSize &) ) );
@@ -194,7 +199,8 @@ void MainWindow::on_actionSave_As_triggered()
 {
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), m_lastDirectory, tr("OSG files (*.*)"));
 
-	osgDB::writeNodeFile(*m_rootNode.get(), fileName.toStdString());
+	m_pSceneModel->saveSceneData(fileName.toStdString());
+	//osgDB::writeNodeFile(*m_rootNode.get(), fileName.toStdString());
 }
 bool MainWindow::loadFile(const QString &file)
 {
@@ -202,8 +208,8 @@ bool MainWindow::loadFile(const QString &file)
         return false;
 
 	m_rootNode = osgDB::readNodeFile(file.toStdString());
-	m_pSceneView->setSceneData(m_rootNode);
-	m_pTreeModel->setNode(m_rootNode);
+	m_pSceneModel->setData(m_rootNode.get());
+	m_pTreeModel->setNode(m_rootNode.get());
     //saveIfNeeded();
 
     //QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
@@ -373,7 +379,7 @@ void MainWindow::on_actionUnload_triggered()
     //    return; // cancel triggered !!
     //}
 
-    m_pSceneView->setSceneData(NULL);
+    m_pSceneModel->setData(NULL);
 	m_pTreeModel->setNode(NULL);
 
     //// disable actions because no more current file !!
@@ -484,15 +490,15 @@ void MainWindow::on_actionTexture_triggered(bool val)
 	//}
 
 	//ui->actionCompass->setEnabled(!val);
-	m_pSceneView->setTextureEnabled(!val);
+	m_pSceneView->setTextureEnabled(val);
 }
 
 void MainWindow::on_actionLight_triggered(bool val)
 {
-	m_pSceneView->setLightingEnabled(!val);
+	m_pSceneView->setLightingEnabled(val);
 }
 
 void MainWindow::on_actionHighLight_triggered(bool val)
 {
-	//m_pSceneView->setHighlightScene(val);
+	m_pSceneView->setHighlightScene(val);
 }

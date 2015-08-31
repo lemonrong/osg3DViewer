@@ -16,7 +16,7 @@
    along with this program; if not, write to the Free Software
 
  *******************************************************************************/
-
+#include "xSceneModel.h"
 #include "xSceneView.h"
 #include <QtGui/QGridLayout>
 
@@ -24,11 +24,7 @@
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/MultiTouchTrackballManipulator>
 
-#include <osgShadow/ShadowMap>
-#include <osgShadow/SoftShadowMap>
-#include <osgShadow/ParallelSplitShadowMap>
-#include <osgShadow/LightSpacePerspectiveShadowMap>
-#include <osgShadow/StandardShadowMap>
+
 
 const unsigned int defaultRefreshPeriod = 30;
 const unsigned int idleRefreshPeriod = 60;
@@ -56,7 +52,7 @@ xSceneView::xSceneView(QWidget *parent) : QWidget(parent), m_refreshPeriod(defau
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
 	m_timer.start(m_refreshPeriod);
 
-	createSceneEnvironnement();
+	//createSceneEnvironnement();
 
 	// by default all stateset are enabled
 	//setBackfaceEnabled(true);
@@ -66,23 +62,23 @@ xSceneView::xSceneView(QWidget *parent) : QWidget(parent), m_refreshPeriod(defau
 
 QWidget* xSceneView::addViewWidget(osgQt::GraphicsWindowQt* gw, osg::Node* scene)
 {
-	m_view = new osgViewer::View;
-	addView(m_view.get());
+	m_pView = new osgViewer::View;
+	addView(m_pView.get());
 
-	m_camera = m_view->getCamera();
-	m_camera->setGraphicsContext(gw);
+	m_pCamera = m_pView->getCamera();
+	m_pCamera->setGraphicsContext(gw);
 	
 	const osg::GraphicsContext::Traits* traits = gw->getTraits();
 
-	m_camera->setClearColor(osg::Vec4(0.2, 0.2, 0.6, 1.0));
-	m_camera->setViewport(new osg::Viewport(0, 0, traits->width, traits->height));
-	m_camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f);
+	m_pCamera->setClearColor(osg::Vec4(0.2, 0.2, 0.6, 1.0));
+	m_pCamera->setViewport(new osg::Viewport(0, 0, traits->width, traits->height));
+	m_pCamera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f);
 
-	m_view->setSceneData(scene);
-	m_view->addEventHandler(new osgViewer::StatsHandler);
-	m_pStatesetManipulator = new osgGA::StateSetManipulator(m_camera->getOrCreateStateSet());
-	m_view->addEventHandler(m_pStatesetManipulator);
-	m_view->setCameraManipulator(new osgGA::MultiTouchTrackballManipulator);
+	m_pView->setSceneData(scene);
+	m_pView->addEventHandler(new osgViewer::StatsHandler);
+	m_pStatesetManipulator = new osgGA::StateSetManipulator(m_pCamera->getOrCreateStateSet());
+	m_pView->addEventHandler(m_pStatesetManipulator);
+	m_pView->setCameraManipulator(new osgGA::MultiTouchTrackballManipulator);
 	gw->setTouchEventsEnabled(true);
 	return gw->getGLWidget();
 }
@@ -104,6 +100,34 @@ osgQt::GraphicsWindowQt* xSceneView::createGraphicsWindow( int x, int y, int w, 
 
 	return new osgQt::GraphicsWindowQt(traits.get());
 }
+void xSceneView::setModel(xSceneModel *model)
+{
+	m_pModel = model;
+	slotUpdateModel();
+
+	// clean previous elements
+	////for (int i = m_rootNodes->getNumChildren() - 1; i >= 0; i--)
+	////	m_rootNodes->removeChild(i);
+
+	
+	//connect( m_model, SIGNAL( loadBegin(bool) ), this, SLOT( resetView(bool) ) );
+	//connect( m_model, SIGNAL( loadFinished() ), this, SLOT( resetHome() ) );
+
+	//if (NULL != m_atm)
+	//{
+	//	connect( m_atm.get(), SIGNAL( picked(osg::Drawable*) ),this, SIGNAL( picked(osg::Drawable*) ) );
+	//	connect( m_atm.get(), SIGNAL( recenterViewTo(double,double,double) ),this, SLOT( recenterPivotPoint(double,double,double) ) );
+
+	//	connect( m_atm.get(), SIGNAL( zoomViewIn() ),this, SLOT( showZoomIn() ) );
+	//	connect( m_atm.get(), SIGNAL( zoomViewOut() ),this, SLOT( showZoomOut() ) );
+	//	connect( m_atm.get(), SIGNAL( dragView() ),this, SLOT( showDrag() ) );
+	//	connect( m_atm.get(), SIGNAL( rotateView() ),this, SLOT( showPivot() ) );
+	//}
+	
+
+	//m_rootNodes->addChild( m_model->getScene() );
+	
+}
 
 void xSceneView::setRefreshPeriod(unsigned int period)
 {
@@ -118,121 +142,6 @@ void xSceneView::setIdle(bool val)
 		m_timer.start(defaultRefreshPeriod);
 }
 
-void xSceneView::createSceneEnvironnement()
-{
-	m_scene = new osg::Group(); // root node
-	m_scene->setName("sceneGroup");
-
-	// Create a clear Node
-
-	//m_clearColor = osg::Vec4f(0.33f,0.33f,0.33f,1.0f);
-	//m_backdrop = new osg::ClearNode;
-	//m_backdrop->setName("backdrop");
-	//m_backdrop->setClearColor(m_clearColor);
-	//m_scene->addChild(m_backdrop);
-
-	//// create and attach the gradient background
-	//m_gradientBackground = createBackground();
-	//m_scene->addChild(m_gradientBackground);
-
-	// Attach the switch containing the root nodes
-	m_rootNodes = new osgShadow::ShadowedScene();
-	m_rootNodes->setReceivesShadowTraversalMask(receivesShadowTraversalMask);
-	m_rootNodes->setCastsShadowTraversalMask(castsShadowTraversalMask);
-	m_rootNodes->setDataVariance( osg::Object::DYNAMIC );
-
-	m_scene->addChild(m_rootNodes);
-
-	//m_grid = makeGrid();
-	//m_scene->addChild(m_grid);
-	//m_axis = makeAxis();
-	//m_scene->addChild(m_axis);
-
-	//// hide by default
-	//m_grid->setNodeMask(0x0);
-	//m_axis->setNodeMask(0x0);
-
-	// for compass
-	//m_cameraCompass = createCompass();
-	//m_scene->addChild(m_cameraCompass);
-
-	//createPivotManipulator();
-
-	m_view->setSceneData(m_scene);
-}
-
-void xSceneView::setSceneData(osg::Node *node)
-{
-	//m_view->setSceneData(node);
-	m_rootNodes->removeChild(0, m_rootNodes->getNumChildren());
-	m_rootNodes->addChild(node);
-
-	m_view->getCameraManipulator()->setAutoComputeHomePosition(false);
-
-	m_rootNodes->dirtyBound();
-
-	// save the current bbox;
-	//ExtentsVisitor ext;
-	//node->accept(ext);
-
-	osg::BoundingSphere bound = m_rootNodes->getBound();
-
-	m_view->getCameraManipulator()->setHomePosition( bound.center() + osg::Vec3( 1.5f * bound.radius(),1.5f * bound.radius(),1.5f * bound.radius()),
-		bound.center(),	osg::Vec3(0.0f,0.0f,1.0f));
-	m_view->home();
-}
-
-//void xSceneView::takeSnapshot()
-//{}
-
-void xSceneView::setShadowEnabled(bool val)
-{
-	
-	if (val)
-	{
-		int alg = 3;
-		const osg::BoundingSphere& bs = m_rootNodes->getBound();
-
-		// test bidon pour modifier l'algo d'ombrage en fonction de la taille de l'objet
-		if (alg == 0)
-		{
-			osg::ref_ptr<osgShadow::ParallelSplitShadowMap> pssm = new osgShadow::ParallelSplitShadowMap(NULL,5);
-			pssm->setTextureResolution(2048);
-			m_rootNodes->setShadowTechnique(pssm.get());
-
-			// blindage mais je ne sais pas trop pourquoi ?!?
-			pssm->init();
-		}
-		else if (alg == 2)
-		{
-			osg::ref_ptr<osgShadow::SoftShadowMap> pssm = new osgShadow::SoftShadowMap();
-
-			pssm->setTextureSize( osg::Vec2s(2048,2048) );
-
-			//pssm->setTextureResolution(2048);
-			m_rootNodes->setShadowTechnique(pssm.get());
-
-			// blindage mais je ne sais pas trop pourquoi ?!?
-			pssm->init();
-		}
-		else if (alg == 3)
-		{
-			osg::ref_ptr<osgShadow::MinimalShadowMap> pssm = new osgShadow::LightSpacePerspectiveShadowMapDB();
-
-			pssm->setTextureSize(osg::Vec2s(2048,2048));
-
-			//pssm->setTextureResolution(2048);
-			m_rootNodes->setShadowTechnique(pssm.get());
-
-			// blindage mais je ne sais pas trop pourquoi ?!?
-			pssm->init();
-		}
-	}
-	else
-	{
-		m_rootNodes->setShadowTechnique(NULL);
-	}
-}
 
 void xSceneView::home()
 {
@@ -244,5 +153,69 @@ void xSceneView::home()
 	//m_view->getCameraManipulator()->getHomePosition(eye, center, up);
 	//recenterPivotPoint( center.x(),center.y(),center.z() );
 
-	m_view->home();
+	m_pView->home();
+}
+
+void xSceneView::setHighlightScene(bool val)
+{
+	if (m_pModel != NULL)
+		m_pModel->setHighlightScene(val);
+}
+
+void xSceneView::setShadowEnabled(bool val)
+{
+	if (m_pModel != NULL)
+		m_pModel->setShadowEnabled(val);
+}
+
+void xSceneView::setLightingEnabled(bool bLightingOn)
+{
+	if (m_pStatesetManipulator.valid())	
+		m_pStatesetManipulator->setLightingEnabled(bLightingOn);
+	if (m_pModel != NULL)
+		m_pModel->setLightingEnabled(bLightingOn);
+	
+}
+bool xSceneView::getLightingEnabled() const
+{
+	if (m_pModel != NULL)
+		return m_pModel->getLightingEnabled();
+	return false;
+}
+
+void xSceneView::setTextureEnabled(bool bTextureOn)
+{
+	if (m_pStatesetManipulator.valid())	
+		m_pStatesetManipulator->setTextureEnabled(bTextureOn);
+	if (m_pModel != NULL)
+		m_pModel->setTextureEnabled(bTextureOn);
+}
+bool xSceneView::getTextureEnabled() const
+{
+	if (m_pModel != NULL)
+		return m_pModel->getTextureEnabled();
+	return false;
+}
+
+void xSceneView::slotUpdateModel()
+{
+	if (m_pModel == NULL)
+		return;
+
+	osg::ref_ptr<osg::Node> ptrRoot = m_pModel->getScene();
+
+	m_pView->setSceneData(ptrRoot);
+	if (m_pStatesetManipulator.valid())
+	{
+		m_pStatesetManipulator->setLightingEnabled(m_pModel->getLightingEnabled());
+		m_pStatesetManipulator->setTextureEnabled(m_pModel->getTextureEnabled());
+	}
+
+	if (ptrRoot.valid())
+	{
+		osg::BoundingSphere bound = ptrRoot->getBound();
+		m_pView->getCameraManipulator()->setHomePosition(bound.center() + osg::Vec3( 1.5f * bound.radius(),1.5f * bound.radius(),1.5f * bound.radius()),
+			bound.center(),	osg::Vec3(0.0f,0.0f,1.0f));
+		m_pView->home();
+	}
 }
