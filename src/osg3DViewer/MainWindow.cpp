@@ -471,6 +471,19 @@ void MainWindow::on_actionReset_View_triggered()
 {
 	m_pSceneView->home();
 }
+void MainWindow::on_actionFull_Screen_triggered(bool on)
+{
+	if (on)
+	{
+		setWindowState(windowState() | Qt::WindowFullScreen);
+		hideDockWidgets();
+	}
+	else
+	{
+		setWindowState(windowState() & ~Qt::WindowFullScreen);
+		showDockWidgets();
+	}
+}
 
 void MainWindow::on_actionShadow_triggered(bool val)
 {
@@ -502,3 +515,34 @@ void MainWindow::on_actionHighLight_triggered(bool val)
 {
 	m_pSceneView->setHighlightScene(val);
 }
+
+void MainWindow::showDockWidgets()
+{
+	QMainWindow::menuBar()->show();
+	QMainWindow::statusBar()->show();
+
+	// restore the dock widget state
+	foreach(QWidget * widget, m_listDock)
+	{
+		widget->show();
+	}
+	m_listDock.clear();
+}
+
+void MainWindow::hideDockWidgets()
+{
+	QMainWindow::statusBar()->hide();
+	QMainWindow::menuBar()->hide();
+
+	// save the visible dock widget
+	foreach(QWidget *widget, findChildren<QDockWidget*>())
+	{
+		if (widget->isVisible())
+		{
+			m_listDock << widget;
+			widget->hide();
+		}
+	}
+}
+
+

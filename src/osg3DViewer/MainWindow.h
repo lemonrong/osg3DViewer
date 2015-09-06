@@ -55,6 +55,7 @@ public slots:
     void setupRecentFilesMenu();
 
 	void on_actionReset_View_triggered();
+	void on_actionFull_Screen_triggered(bool on);
 	void on_actionTexture_triggered(bool val);
 	void on_actionLight_triggered(bool val);
 	void on_actionHighLight_triggered(bool val);
@@ -79,12 +80,16 @@ private:
     void enableActions(bool);
     void updateApplicationIdentity();
 
+	void hideDockWidgets();
+	void showDockWidgets();
+
 private:
 	Ui::MainWindow ui;
 	osg::ref_ptr<osg::Node> m_rootNode;
 	xSceneView *m_pSceneView;
 	xSceneModel *m_pSceneModel;
 
+	QList<QWidget *> m_listDock;
 	xTreeModel *m_pTreeModel;
 	xTreeView *m_pTreeView;
 

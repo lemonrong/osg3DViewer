@@ -52,6 +52,8 @@
      <string>Scene</string>
     </property>
     <addaction name="actionReset_View"/>
+    <addaction name="actionFull_Screen"/>
+    <addaction name="separator"/>
     <addaction name="actionTexture"/>
     <addaction name="actionLight"/>
     <addaction name="actionHighLight"/>
@@ -108,6 +110,8 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionReset_View"/>
+   <addaction name="actionFull_Screen"/>
+   <addaction name="separator"/>
    <addaction name="actionTexture"/>
    <addaction name="actionLight"/>
    <addaction name="actionHighLight"/>
@@ -204,6 +208,18 @@
    </property>
    <property name="text">
     <string>Shadow</string>
+   </property>
+  </action>
+  <action name="actionFull_Screen">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../res/osg3DViewer.qrc">
+     <normaloff>:/osg3DViewer/fullscreen.png</normaloff>:/osg3DViewer/fullscreen.png</iconset>
+   </property>
+   <property name="text">
+    <string>Full Screen</string>
    </property>
   </action>
  </widget>
