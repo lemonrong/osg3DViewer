@@ -141,6 +141,7 @@ void MainWindow::updateUi()
     m_pTreeModel = new xTreeModel(this);
 	m_pTreeView = new xTreeView(this);
 	m_pTreeView->setModel(m_pTreeModel);
+	connect(m_pTreeView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotTreeNodeSelected(const QModelIndex &)), Qt::UniqueConnection);
 	//QVBoxLayout *pTreeWidgetLayout = new QVBoxLayout(this);
 	
 
@@ -545,4 +546,12 @@ void MainWindow::hideDockWidgets()
 	}
 }
 
-
+void MainWindow::slotTreeNodeSelected(const QModelIndex &index)
+{
+	if ( index.isValid() )
+	{
+		m_pSceneView->highlight((osg::Node *)index.internalPointer());
+		// display Properties
+		//m_pSceneView->displayProperties((osg::Node *)index.internalPointer());
+	}
+}

@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
     osgDB::Registry::instance()->getDataFilePathList().push_back( QString(qApp->applicationDirPath() + "/data/").toStdString () );
     osgDB::Registry::instance()->getDataFilePathList().push_back( QString(qApp->applicationDirPath() + "/../data/").toStdString () );
     osgDB::Registry::instance()->getDataFilePathList().push_back( QString(qApp->applicationDirPath() + "/../../data/").toStdString () );
-    osgDB::Registry::instance()->getDataFilePathList().push_back( "/usr/local/share/osgrafx/data/" );
-    osgDB::Registry::instance()->getDataFilePathList().push_back( "/usr/share/osgrafx/data/" );
+    osgDB::Registry::instance()->getDataFilePathList().push_back( "/usr/local/share/osg3DViewer/data/" );
+    osgDB::Registry::instance()->getDataFilePathList().push_back( "/usr/share/osg3DViewer/data/" );
 
     // in order to speed up the picking process ...
     osgDB::Registry::instance()->setBuildKdTreesHint(osgDB::ReaderWriter::Options::BUILD_KDTREES);

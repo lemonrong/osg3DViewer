@@ -61,6 +61,8 @@ public slots:
 	void on_actionHighLight_triggered(bool val);
 	void on_actionShadow_triggered(bool val);
 
+	void slotTreeNodeSelected(const QModelIndex &index);
+
 protected slots:
 
     void dragEnterEvent(QDragEnterEvent *event);

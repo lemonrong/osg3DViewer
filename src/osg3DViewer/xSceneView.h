@@ -31,7 +31,7 @@
 
 //#include <osgFX/Scribe>
 class xSceneModel;
-
+class xSelectionManager;
 class xSceneView : public QWidget, public osgViewer::CompositeViewer
 {
 	Q_OBJECT
@@ -55,6 +55,10 @@ public:
 	void setShadowEnabled(bool val);
 	void home();
 
+	void resetSelection();
+
+	bool highlight(osg::Node* node);
+
 public slots:
 	void slotUpdateModel();
 
@@ -65,7 +69,7 @@ protected:
 
 private:
 	//void createSceneEnvironnement();
-	//bool highlight(osg::Node* node);
+	
 
 private:
 	QTimer m_timer;
@@ -75,6 +79,7 @@ private:
 	osg::ref_ptr<osgGA::StateSetManipulator> m_pStatesetManipulator;
 
 	xSceneModel *m_pModel;
+	xSelectionManager *m_selectionManager;
 };
 
 #endif 

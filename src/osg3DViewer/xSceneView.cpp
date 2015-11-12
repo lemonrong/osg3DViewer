@@ -18,6 +18,8 @@
  *******************************************************************************/
 #include "xSceneModel.h"
 #include "xSceneView.h"
+#include "xSelectionManager.h"
+#include "xShaderSelectionDecorator.h"
 #include <QtGui/QGridLayout>
 
 #include <osgDB/WriteFile>
@@ -34,7 +36,7 @@ const int castsShadowTraversalMask = 0x2;
 
 //------------------------------------------------------------------------------------------------------------
 
-xSceneView::xSceneView(QWidget *parent) : QWidget(parent), m_refreshPeriod(defaultRefreshPeriod)
+xSceneView::xSceneView(QWidget *parent) : QWidget(parent), m_refreshPeriod(defaultRefreshPeriod), m_selectionManager(NULL)
 {
 	setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
 	setKeyEventSetsDone(0);
@@ -195,6 +197,23 @@ bool xSceneView::getTextureEnabled() const
 	if (m_pModel != NULL)
 		return m_pModel->getTextureEnabled();
 	return false;
+}
+bool xSceneView::highlight(osg::Node* node)
+{
+	if (!m_selectionManager)
+	{
+		m_selectionManager = new xSelectionManager;
+		m_selectionManager->setSelectionDecorator(new xShaderSelectionDecorator);
+	}
+
+	resetSelection();
+	m_selectionManager->select(node);
+	return true;
+}
+void xSceneView::resetSelection()
+{
+	if (m_selectionManager)
+		m_selectionManager->clearSelection();
 }
 
 void xSceneView::slotUpdateModel()
