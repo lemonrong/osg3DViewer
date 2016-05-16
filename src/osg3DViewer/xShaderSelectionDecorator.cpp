@@ -30,15 +30,15 @@ class SineAnimation : public osg::Uniform::Callback
 {
 public:
 
-    SineAnimation( float rate = 1.0f, float scale = 1.0f, float offset = 0.0f ) :
+    SineAnimation(float rate = 1.0f, float scale = 1.0f, float offset = 0.0f) :
         _rate(rate), _scale(scale), _offset(offset)
     {}
 
-    void operator()( osg::Uniform* uniform, osg::NodeVisitor* nv )
+    void operator()(osg::Uniform* uniform, osg::NodeVisitor* nv)
     {
         float angle = _rate * nv->getFrameStamp()->getSimulationTime();
-        float value = sinf( angle ) * _scale + _offset;
-        uniform->set( value );
+        float value = sinf(angle) * _scale + _offset;
+        uniform->set(value);
     }
 
 private:
@@ -61,9 +61,9 @@ public:
 
     virtual ~GlowUpdateCallback() {}
 
-    virtual void operator() ( osg::Node* node, osg::NodeVisitor* nv )
+    virtual void operator() (osg::Node* node, osg::NodeVisitor* nv)
     {
-        float alpha = 1.0 * ( ( 50.0 + (m_pos) ) / 255.0 );
+        float alpha = 1.0 * ((50.0 + (m_pos)) / 255.0);
         m_uniform->set(alpha);
         m_pos += m_increment;
 
@@ -84,7 +84,7 @@ private:
 /*!
     Constructor
  */
-xShaderSelectionDecorator::xShaderSelectionDecorator() : xISelectionDecorator()
+xShaderSelectionDecorator::xShaderSelectionDecorator() : xSelectionDecorator()
 {
     // create highlighting state
     m_pStateSet = getOrCreateStateSet();
@@ -95,13 +95,13 @@ xShaderSelectionDecorator::xShaderSelectionDecorator() : xISelectionDecorator()
 
     setEnable(true);
 
-    if ( loadShader() )
+    if (loadShader())
     {
-        m_pStateSet->setAttributeAndModes( m_program.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON );
+        m_pStateSet->setAttributeAndModes(m_program.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
 
-        m_glowFactor = new osg::Uniform("glowFactor",0.1f );
-        m_glowFactor->setUpdateCallback( new SineAnimation( 4, 0.5, 0.5 ) );
-        m_pStateSet->addUniform( m_glowFactor);
+        m_glowFactor = new osg::Uniform("glowFactor",0.1f);
+        m_glowFactor->setUpdateCallback(new SineAnimation(4, 0.5, 0.5));
+        m_pStateSet->addUniform(m_glowFactor);
     }
 }
 
@@ -112,7 +112,7 @@ xShaderSelectionDecorator::~xShaderSelectionDecorator()
 {
 }
 
-void xShaderSelectionDecorator::traverse( osg::NodeVisitor& nv )
+void xShaderSelectionDecorator::traverse(osg::NodeVisitor& nv)
 {
     const osg::FrameStamp *fs = nv.getFrameStamp();
     if (fs)
@@ -126,7 +126,7 @@ void xShaderSelectionDecorator::traverse( osg::NodeVisitor& nv )
 			m_glowFactor->set(value);
     }
 
-    xISelectionDecorator::traverse( nv );
+    xSelectionDecorator::traverse(nv);
 }
 
 bool xShaderSelectionDecorator::loadShader()
@@ -137,7 +137,7 @@ bool xShaderSelectionDecorator::loadShader()
     std::string vertShaderSource = osgDB::findDataFile("highlight.vert");
 
     success = vertShader->loadShaderSourceFromFile(vertShaderSource);
-    if ( !success  )
+    if (!success )
     {
         std::cout << "Couldn't load file: " << vertShaderSource << std::endl;
         return success;
@@ -146,7 +146,7 @@ bool xShaderSelectionDecorator::loadShader()
     osg::Shader *fragShader = new osg::Shader(osg::Shader::FRAGMENT);
     std::string fragShaderSource = osgDB::findDataFile("highlight.frag");
     success = fragShader->loadShaderSourceFromFile(fragShaderSource);
-    if ( !success  )
+    if (!success )
     {
         std::cout << "Couldn't load file: " << fragShaderSource << std::endl;
         return success;
@@ -155,8 +155,8 @@ bool xShaderSelectionDecorator::loadShader()
     m_program = new osg::Program;
     m_program->setName("highlightshading");
 
-    m_program->addShader( vertShader );
-    m_program->addShader( fragShader );
+    m_program->addShader(vertShader);
+    m_program->addShader(fragShader);
 
     return success;
 }

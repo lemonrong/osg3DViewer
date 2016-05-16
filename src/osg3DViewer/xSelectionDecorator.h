@@ -30,19 +30,19 @@
 /*!
     @brief Selection decorator class for selection highlighting.
  */
-class xISelectionDecorator : public osg::Group
+class xSelectionDecorator : public osg::Group
 {
 public:
 
     // Initialization
-    xISelectionDecorator();           //!< Constructor
-    virtual ~xISelectionDecorator();  //!< Destructor
+    xSelectionDecorator();           //!< Constructor
+    virtual ~xSelectionDecorator();  //!< Destructor
 
     // Highlighting states
     virtual void setEnable(bool enable);    //!< Enable or disable selection highlighting.
     virtual bool getEnable() const;         //!< Return 'true' if selection highlighting is enabled.
 
-    virtual void traverse( osg::NodeVisitor& nv );
+    virtual void traverse(osg::NodeVisitor& nv);
 
 protected:
 
@@ -50,7 +50,7 @@ protected:
     osg::ref_ptr<osg::StateSet> m_pStateSet;        //!< StateSet for highlight rendering.
 };
 
-class xDefaultSelectionDecorator : public xISelectionDecorator
+class xDefaultSelectionDecorator : public xSelectionDecorator
 {
 public:
 

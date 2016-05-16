@@ -53,12 +53,12 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     // add the current path
-    osgDB::Registry::instance()->getDataFilePathList().push_back( qApp->applicationDirPath().toStdString () );
-    osgDB::Registry::instance()->getDataFilePathList().push_back( QString(qApp->applicationDirPath() + "/data/").toStdString () );
-    osgDB::Registry::instance()->getDataFilePathList().push_back( QString(qApp->applicationDirPath() + "/../data/").toStdString () );
-    osgDB::Registry::instance()->getDataFilePathList().push_back( QString(qApp->applicationDirPath() + "/../../data/").toStdString () );
-    osgDB::Registry::instance()->getDataFilePathList().push_back( "/usr/local/share/osg3DViewer/data/" );
-    osgDB::Registry::instance()->getDataFilePathList().push_back( "/usr/share/osg3DViewer/data/" );
+    osgDB::Registry::instance()->getDataFilePathList().push_back(qApp->applicationDirPath().toStdString ());
+    osgDB::Registry::instance()->getDataFilePathList().push_back(QString(qApp->applicationDirPath() + "/data/").toStdString ());
+    osgDB::Registry::instance()->getDataFilePathList().push_back(QString(qApp->applicationDirPath() + "/../data/").toStdString ());
+    osgDB::Registry::instance()->getDataFilePathList().push_back(QString(qApp->applicationDirPath() + "/../../data/").toStdString ());
+    osgDB::Registry::instance()->getDataFilePathList().push_back("/usr/local/share/osg3DViewer/data/");
+    osgDB::Registry::instance()->getDataFilePathList().push_back("/usr/share/osg3DViewer/data/");
 
     // in order to speed up the picking process ...
     osgDB::Registry::instance()->setBuildKdTreesHint(osgDB::ReaderWriter::Options::BUILD_KDTREES);
@@ -71,11 +71,11 @@ int main(int argc, char *argv[])
     bool forceResetConfig = false;
     QString filename;
     QStringList args = QApplication::arguments();
-    for ( int i = 1; i < args.count(); ++i )
+    for (int i = 1; i < args.count(); ++i)
     {
         const QString arg = args.at(i);
 
-        if ( arg == "--reset-config" )
+        if (arg == "--reset-config")
         {
             forceResetConfig = true;
         }

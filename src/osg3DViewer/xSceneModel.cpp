@@ -45,7 +45,7 @@
 
 // typedefs and definitions
 #if   !defined(CLAMP)
-#define  CLAMP(x,min,max)   ( (x<min) ? min : ( (x>max) ? max : x ) )
+#define  CLAMP(x,min,max)   ((x<min) ? min : ((x>max) ? max : x))
 #endif
 
 const int receivesShadowTraversalMask = 0x1;
@@ -63,9 +63,9 @@ xSceneModel::xSceneModel(QObject *parent) :
     // set the osg log to QT message
     osg::setNotifyLevel(osg::NOTICE);
     //OsgLogger *loggerCout = new OsgLogger(std::cout);
-    //connect(loggerCout, SIGNAL( message(const QString &) ), LogHandler::getInstance(), SLOT( reportDebug(const QString &) ),Qt::QueuedConnection);
+    //connect(loggerCout, SIGNAL(message(const QString &)), LogHandler::getInstance(), SLOT(reportDebug(const QString &)),Qt::QueuedConnection);
     //OsgLogger *loggerCerr = new OsgLogger(std::cerr);
-    //connect(loggerCerr, SIGNAL( message(const QString &) ),  LogHandler::getInstance(), SLOT( reportInfo(const QString &) ),Qt::QueuedConnection);
+    //connect(loggerCerr, SIGNAL(message(const QString &)),  LogHandler::getInstance(), SLOT(reportInfo(const QString &)),Qt::QueuedConnection);
 
     //osg::setNotifyLevel(osg::DEBUG_INFO);
     //osg::setNotifyLevel(osg::NOTICE);
@@ -97,7 +97,7 @@ void xSceneModel::setHighlightScene(bool val)
 		//osg::Group *parent = m_rootNodes->getParent(0);
 		m_pCurrentHightlight = new osgFX::Scribe();
 		m_pCurrentHightlight->setWireframeLineWidth(2.0);
-		m_pCurrentHightlight->setWireframeColor( osg::Vec4(1.0,1.0,1.0,1.0) );
+		m_pCurrentHightlight->setWireframeColor(osg::Vec4(1.0,1.0,1.0,1.0));
 
 		m_pCurrentHightlight->addChild(m_rootShadowNodes);
 		m_pNodeScene->replaceChild(m_rootShadowNodes, m_pCurrentHightlight);
@@ -109,7 +109,7 @@ void xSceneModel::setHighlightScene(bool val)
 		//for(osg::Node::ParentList::iterator itr = parentList.begin();
 		//	itr!=parentList.end();
 		//	++itr)
-		//	(*itr)->replaceChild(parentAsScribe,parentAsScribe->getChild(0) );
+		//	(*itr)->replaceChild(parentAsScribe,parentAsScribe->getChild(0));
 		m_pNodeScene->replaceChild(m_pCurrentHightlight, m_rootShadowNodes);
 	}
 }
@@ -145,7 +145,7 @@ void xSceneModel::createScene()
 	m_rootShadowNodes = new osgShadow::ShadowedScene();
 	m_rootShadowNodes->setReceivesShadowTraversalMask(receivesShadowTraversalMask);
 	m_rootShadowNodes->setCastsShadowTraversalMask(castsShadowTraversalMask);
-	m_rootShadowNodes->setDataVariance( osg::Object::DYNAMIC);
+	m_rootShadowNodes->setDataVariance(osg::Object::DYNAMIC);
 
 	m_pNodeScene->addChild(m_rootShadowNodes.get());
 
@@ -163,8 +163,8 @@ osg::Group * xSceneModel::createSceneLight()
     osg::LightSource *lightSource = new osg::LightSource;
     lightSource->setLocalStateSetModes(osg::StateAttribute::ON);
 
-    lightSource->getLight()->setAmbient(osg::Vec4(0.4,0.4,0.4,1.0));
-    lightSource->getLight()->setDiffuse(osg::Vec4(0.6,0.6,0.6,1.0));
+    lightSource->getLight()->setAmbient(osg::Vec4(1.0,1.0,1.0,1.0));
+    lightSource->getLight()->setDiffuse(osg::Vec4(1.0,1.0,1.0,1.0));
     lightSource->getLight()->setPosition(osg::Vec4(0.f,1000.0f,1000.0f,0.0f));
     grp->addChild(lightSource);
 
@@ -227,7 +227,7 @@ void xSceneModel::setShadowEnabled(bool val)
 		{
 			osg::ref_ptr<osgShadow::SoftShadowMap> pssm = new osgShadow::SoftShadowMap();
 
-			pssm->setTextureSize( osg::Vec2s(2048,2048) );
+			pssm->setTextureSize(osg::Vec2s(2048,2048));
 
 			//pssm->setTextureResolution(2048);
 			m_rootShadowNodes->setShadowTechnique(pssm.get());

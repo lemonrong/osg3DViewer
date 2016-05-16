@@ -45,7 +45,7 @@ void xSelectionManager::clearSelection()
         m_pSelectionDecorator->removeChild(0,1);
 
     if (m_pSelectionDecorator->getNumParents() > 0)
-        m_pSelectionDecorator->getParent(0)->removeChild( m_pSelectionDecorator.get() );
+        m_pSelectionDecorator->getParent(0)->removeChild(m_pSelectionDecorator.get());
 }
 
 /*!
@@ -64,7 +64,7 @@ bool xSelectionManager::select(osg::Node* pNode)
 
         if (pParent)
         {
-            pParent->addChild( m_pSelectionDecorator.get() );
+            pParent->addChild(m_pSelectionDecorator.get());
         }
     }
 
@@ -89,7 +89,7 @@ bool xSelectionManager::select(osg::Geometry* pGeom)
         osg::Geode *newparent = new osg::Geode;
 
         // duplicate current geometry
-        osg::Geometry *newgeom = dynamic_cast<osg::Geometry*>( pGeom->clone(osg::CopyOp::DEEP_COPY_PRIMITIVES) );
+        osg::Geometry *newgeom = dynamic_cast<osg::Geometry*>(pGeom->clone(osg::CopyOp::DEEP_COPY_PRIMITIVES));
 
         newparent->addDrawable(newgeom);
 
@@ -98,7 +98,7 @@ bool xSelectionManager::select(osg::Geometry* pGeom)
         osg::Node* pParent = pGeom->getParent(0);
 
         if (pParent)
-            pParent->getParent(0)->addChild( m_pSelectionDecorator.get() );
+            pParent->getParent(0)->addChild(m_pSelectionDecorator.get());
     }
 
     // keep the pointer of the selected node
@@ -147,20 +147,20 @@ const osg::Geometry* xSelectionManager::getSelectedGeometry() const
     Replace the selection decorator for highlighting.
     @param[in] pDecorator New selection decorator.
  */
-void xSelectionManager::setSelectionDecorator(xISelectionDecorator* pDecorator)
+void xSelectionManager::setSelectionDecorator(xSelectionDecorator* pDecorator)
 {
     if (!pDecorator)
         return;
 
     m_pSelectionDecorator = pDecorator;
-    select( m_pSelectedNode.get() );
+    select(m_pSelectedNode.get());
 }
 
 /*!
     Return the selection decorator.
     @return Current selection decorator.
  */
-xISelectionDecorator* xSelectionManager::getSelectionDecorator()
+xSelectionDecorator* xSelectionManager::getSelectionDecorator()
 {
     return m_pSelectionDecorator.get();
 }
@@ -169,7 +169,7 @@ xISelectionDecorator* xSelectionManager::getSelectionDecorator()
     Return the selection decorator.
     @return Current selection decorator.
  */
-const xISelectionDecorator* xSelectionManager::getSelectionDecorator() const
+const xSelectionDecorator* xSelectionManager::getSelectionDecorator() const
 {
     return m_pSelectionDecorator.get();
 }

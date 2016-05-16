@@ -27,6 +27,8 @@
 #include <osgViewer/CompositeViewer>
 #include <osgGA/StateSetManipulator>
 #include <osgQt/GraphicsWindowQt>
+
+#include "xPickingHandler.h"
 //#include <osgShadow/ShadowedScene>
 
 //#include <osgFX/Scribe>
@@ -62,6 +64,11 @@ public:
 public slots:
 	void slotUpdateModel();
 
+signals:
+	//void newScreenshotAvailable(osg::Image *);
+	void sigNewAspectRatio(const QSize &);
+	void sigPicked(osg::Drawable *);
+
 protected:
 	QWidget* addViewWidget(osgQt::GraphicsWindowQt* gw, osg::Node* scene);
 	osgQt::GraphicsWindowQt* createGraphicsWindow(int x, int y, int w, int h, const std::string& name="", bool windowDecoration=false);
@@ -77,6 +84,7 @@ private:
 	osg::ref_ptr<osg::Camera> m_pCamera;
 	osg::ref_ptr<osgViewer::View> m_pView;
 	osg::ref_ptr<osgGA::StateSetManipulator> m_pStatesetManipulator;
+	osg::ref_ptr<xPickingHandler>  m_pPickHandler;
 
 	xSceneModel *m_pModel;
 	xSelectionManager *m_selectionManager;

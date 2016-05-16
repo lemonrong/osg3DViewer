@@ -49,6 +49,7 @@
 #include "xSceneModel.h"
 #include "xTreeModel.h"
 #include "xTreeView.h"
+#include "xPropertyWidget.h"
 
 //#include "PreferencesWidget.h"
 //#include "ThreadPool.h"
@@ -111,6 +112,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 	m_pSceneView = new xSceneView(ui.centralwidget);
 	grid->addWidget(m_pSceneView, 0, 0);
+
+	m_pPropertyWidget = new xPropertyWidget(ui.dockWidget_Properties);
+	ui.dockWidget_Properties->setWidget(m_pPropertyWidget);
+
 	loadSettings();
     updateUi();
 }
@@ -130,8 +135,8 @@ void MainWindow::updateUi()
     connect(ui.menuRecent_Files, SIGNAL(triggered(QAction*)), this, SLOT(recentFileActivated(QAction*)));
 
     //// create the log handler
-    //connect( LogHandler::getInstance(),SIGNAL( newMessage(const QString &) ),this,SLOT( printToLog(const QString &) ) );
-    //connect( LogHandler::getInstance(),SIGNAL( newMessages(const QStringList &) ),this,SLOT( printToLog(const QStringList &) ) );
+    //connect(LogHandler::getInstance(),SIGNAL(newMessage(const QString &)),this,SLOT(printToLog(const QString &)));
+    //connect(LogHandler::getInstance(),SIGNAL(newMessages(const QStringList &)),this,SLOT(printToLog(const QStringList &)));
     //LogHandler::getInstance()->startEmission(true); // start log emission
 
     //// limit log display
@@ -147,7 +152,7 @@ void MainWindow::updateUi()
 
 	ui.dockWidget_Model->setWidget(m_pTreeView);
 	//pTreeWidgetLayout->addWidget(m_pTreeView);
-    //connect( ui->treeViewStructure, SIGNAL( clicked ( const QModelIndex &) ), this, SLOT( nodeSelected(const QModelIndex & ) ) );
+    //connect(ui->treeViewStructure, SIGNAL(clicked (const QModelIndex &)), this, SLOT(nodeSelected(const QModelIndex &)));
 
     //enableActions(false);
 
@@ -158,9 +163,9 @@ void MainWindow::updateUi()
     //m_sceneModel = new SceneModel(this);
     //ui->widgetSceneView->setModel(m_sceneModel);
 	
-    //connect(ui->widgetSceneView,SIGNAL( newScreenshotAvailable(osg::Image *) ),this,SLOT( takeIntoAccountScreenshot(osg::Image*) ),Qt::QueuedConnection);
-    //connect( ui->widgetSceneView, SIGNAL( picked(osg::Drawable*) ), this, SLOT( selectTreeItem(osg::Drawable*) ) );
-    //connect( ui->widgetSceneView, SIGNAL( newAspectRatio(const QSize &) ), this, SLOT( changeAspectRatio(const QSize &) ) );
+    //connect(ui->widgetSceneView,SIGNAL(newScreenshotAvailable(osg::Image *)),this,SLOT(takeIntoAccountScreenshot(osg::Image*)),Qt::QueuedConnection);
+    connect(m_pSceneView, SIGNAL(sigPicked(osg::Drawable*)), this, SLOT(slotSelectTreeItem(osg::Drawable*)));
+    //connect(ui->widgetSceneView, SIGNAL(sigNewAspectRatio(const QSize &)), this, SLOT(changeAspectRatio(const QSize &)));
 
     //// install eventfilter for sceneview
     //ui->widgetSceneView->installEventFilter(this);
@@ -176,14 +181,14 @@ void MainWindow::updateUi()
 
     //// create a background loader
     //m_bgLoader = new ObjectLoader();
-    //m_bgLoader->moveToThread( ThreadPool::getInstance()->getThread() );
-    //connect( this,SIGNAL( newFileToLoad(const QString &) ),m_bgLoader,SLOT( newObjectToLoad(const QString &) ) );
-    //connect( m_bgLoader,SIGNAL( newObjectToView(osg::Node *) ),this,SLOT( newLoadedFile(osg::Node *) ) );
+    //m_bgLoader->moveToThread(ThreadPool::getInstance()->getThread());
+    //connect(this,SIGNAL(newFileToLoad(const QString &)),m_bgLoader,SLOT(newObjectToLoad(const QString &)));
+    //connect(m_bgLoader,SIGNAL(newObjectToView(osg::Node *)),this,SLOT(newLoadedFile(osg::Node *)));
 
     //// bookmarks
-    //connect( ui->widgetBookmarkManager,SIGNAL( newBookmarkRequest() ),this,SLOT( on_actionNewBookmark_triggered() ) );
-    //connect( ui->widgetBookmarkManager,SIGNAL( useBookmarkItem(BookmarkItem *) ),this,SLOT( useBookmarkItem(BookmarkItem *) ) );
-    //connect( ui->widgetBookmarkManager,SIGNAL( updateBookmarkItemRequest(BookmarkItem *) ),this,SLOT( updateBookmarkItem(BookmarkItem *) ) );
+    //connect(ui->widgetBookmarkManager,SIGNAL(newBookmarkRequest()),this,SLOT(on_actionNewBookmark_triggered()));
+    //connect(ui->widgetBookmarkManager,SIGNAL(useBookmarkItem(BookmarkItem *)),this,SLOT(useBookmarkItem(BookmarkItem *)));
+    //connect(ui->widgetBookmarkManager,SIGNAL(updateBookmarkItemRequest(BookmarkItem *)),this,SLOT(updateBookmarkItem(BookmarkItem *)));
 }
 
 void MainWindow::on_actionQuit_triggered()
@@ -205,7 +210,7 @@ void MainWindow::on_actionSave_As_triggered()
 }
 bool MainWindow::loadFile(const QString &file)
 {
-    if ( file.isEmpty() || !QFileInfo(file).exists() )
+    if (file.isEmpty() || !QFileInfo(file).exists())
         return false;
 
 	m_rootNode = osgDB::readNodeFile(file.toStdString());
@@ -213,7 +218,7 @@ bool MainWindow::loadFile(const QString &file)
 	m_pTreeModel->setNode(m_rootNode.get());
     //saveIfNeeded();
 
-    //QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
+    //QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     m_currFile = file;
     m_lastDirectory = QFileInfo(file).absolutePath();
@@ -231,13 +236,13 @@ void MainWindow::addRecentlyOpenedFile(const QString &fn, QStringList &lst)
 {
     QFileInfo fi(fn);
 
-    if ( lst.contains( fi.absoluteFilePath() ) )
+    if (lst.contains(fi.absoluteFilePath()))
         return;
 
-    if ( lst.count() >= maxRecentlyOpenedFile )
+    if (lst.count() >= maxRecentlyOpenedFile)
         lst.removeLast();
 
-    lst.prepend( fi.absoluteFilePath() );
+    lst.prepend(fi.absoluteFilePath());
 }
 
 void MainWindow::setupRecentFilesMenu()
@@ -262,7 +267,8 @@ void MainWindow::recentFileActivated(QAction *action)
 {
     if (!action->text().isEmpty())
     {
-        loadFile(action->text());
+        if (!loadFile(action->text()))
+			m_recentFiles.removeAt(m_recentFiles.indexOf(action->text()));
     }
 }
 
@@ -284,6 +290,7 @@ void MainWindow::enableActions(bool val)
     //ui->widgetStats->setEnabled(val);
     //ui->widgetProperties->setEnabled(val);
     //ui->treeDockContents->setEnabled(val);
+	m_pPropertyWidget->setEnabled(val);
 }
 
 
@@ -350,9 +357,9 @@ void MainWindow::dropEvent(QDropEvent *event)
 //-------------------------------------------------------------------------------
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    //if ( !saveIfNeeded() )
+    //if (!saveIfNeeded())
     //{
-    //    statusBar()->showMessage( tr( "Quit application aborted !!" ), 5000 );
+    //    statusBar()->showMessage(tr("Quit application aborted !!"), 5000);
     //    event->ignore();
     //    return; // cancel triggered !!
     //}
@@ -374,9 +381,9 @@ void MainWindow::updateApplicationIdentity()
 
 void MainWindow::on_actionUnload_triggered()
 {
-    //if ( !saveIfNeeded() )
+    //if (!saveIfNeeded())
     //{
-    //    statusBar()->showMessage( tr( "Close current object aborted !!" ), 5000 );
+    //    statusBar()->showMessage(tr("Close current object aborted !!"), 5000);
     //    return; // cancel triggered !!
     //}
 
@@ -392,7 +399,7 @@ void MainWindow::saveSettings()
 	QSettings settings(PACKAGE_ORGANIZATION, PACKAGE_NAME);
 
 	settings.beginGroup("MainWindow");
-	settings.setValue( "MainWindowState",saveState(0) );
+	settings.setValue("MainWindowState",saveState(0));
 	settings.setValue("size", size());
 	settings.setValue("pos", pos());
 	settings.setValue("fullScreen", isFullScreen());
@@ -417,7 +424,7 @@ void MainWindow::saveSettings()
 	settings.setValue("recentlyOpenedFiles", m_recentFiles);
 
 	// scene background
-	//settings.setValue( "bgcolor", ui->widgetSceneView->getBgColor() );
+	//settings.setValue("bgcolor", ui->widgetSceneView->getBgColor());
 
 	settings.endGroup();
 }
@@ -430,8 +437,8 @@ void MainWindow::loadSettings()
 
 	restoreState(settings.value("MainWindowState").toByteArray(), 0);
 
-	resize(settings.value( "size", QSize(600, 600)).toSize());
-	move(settings.value( "pos", QPoint(200, 200)).toPoint());
+	resize(settings.value("size", QSize(600, 600)).toSize());
+	move(settings.value("pos", QPoint(200, 200)).toPoint());
 
 	bool fullScreen = settings.value("fullScreen",false).toBool();
 	if (fullScreen)
@@ -443,9 +450,9 @@ void MainWindow::loadSettings()
 	//m_lastDirectorySnapshot = settings.value("lastDirectorySnapshot","/home").toString();
 
 	// recent files
-	m_recentFiles = settings.value( "recentlyOpenedFiles").toStringList();
+	m_recentFiles = settings.value("recentlyOpenedFiles").toStringList();
 
-	//m_splashscreenAtStartup = settings.value( "splashscreenAtStartup", true).toBool();
+	//m_splashscreenAtStartup = settings.value("splashscreenAtStartup", true).toBool();
 	//m_splashscreenTransparentBackground = settings.value("splashscreenTransparentBackground",true).toBool();
 
 	//m_resetConfig = settings.value("resetConfig", false).toBool();
@@ -458,11 +465,11 @@ void MainWindow::loadSettings()
 
 	//m_currentLanguage = settings.value("currentLanguage","").toString();
 
-	//if ( m_currentLanguage.isEmpty() )
+	//if (m_currentLanguage.isEmpty())
 	//	m_currentLanguage = QLocale::system().name().left(2);
 
 	//// scene background
-	//QColor color = settings.value( "bgcolor",QColor(50,50,50) ).value<QColor>();
+	//QColor color = settings.value("bgcolor",QColor(50,50,50)).value<QColor>();
 	//ui->widgetSceneView->setBgColor(color);
 
 	settings.endGroup();
@@ -548,10 +555,24 @@ void MainWindow::hideDockWidgets()
 
 void MainWindow::slotTreeNodeSelected(const QModelIndex &index)
 {
-	if ( index.isValid() )
+	if (index.isValid())
 	{
 		m_pSceneView->highlight((osg::Node *)index.internalPointer());
 		// display Properties
 		//m_pSceneView->displayProperties((osg::Node *)index.internalPointer());
+		m_pPropertyWidget->displayProperties((osg::Node *)index.internalPointer());
+	}
+}
+
+void MainWindow::slotSelectTreeItem(osg::Drawable *pDrawable)
+{
+	QModelIndex parentIndex = m_pTreeModel->searchForNode(pDrawable->getParent(0));
+
+	if (parentIndex.isValid())
+	{
+		m_pTreeView->setCurrentIndex(parentIndex);
+		m_pTreeView->scrollTo(parentIndex, QAbstractItemView::EnsureVisible);
+		m_pTreeView->resizeColumnToContents(0);
+		slotTreeNodeSelected(parentIndex);
 	}
 }

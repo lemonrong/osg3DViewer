@@ -54,6 +54,8 @@ xSceneView::xSceneView(QWidget *parent) : QWidget(parent), m_refreshPeriod(defau
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
 	m_timer.start(m_refreshPeriod);
 
+	m_pPickHandler = new xPickingHandler();
+	m_pView->setCameraManipulator(m_pPickHandler.get());
 	//createSceneEnvironnement();
 
 	// by default all stateset are enabled
@@ -80,11 +82,11 @@ QWidget* xSceneView::addViewWidget(osgQt::GraphicsWindowQt* gw, osg::Node* scene
 	m_pView->addEventHandler(new osgViewer::StatsHandler);
 	m_pStatesetManipulator = new osgGA::StateSetManipulator(m_pCamera->getOrCreateStateSet());
 	m_pView->addEventHandler(m_pStatesetManipulator);
-	m_pView->setCameraManipulator(new osgGA::MultiTouchTrackballManipulator);
+	//m_pView->setCameraManipulator(new osgGA::MultiTouchTrackballManipulator);
 	gw->setTouchEventsEnabled(true);
 	return gw->getGLWidget();
 }
-osgQt::GraphicsWindowQt* xSceneView::createGraphicsWindow( int x, int y, int w, int h, const std::string& name, bool windowDecoration)
+osgQt::GraphicsWindowQt* xSceneView::createGraphicsWindow(int x, int y, int w, int h, const std::string& name, bool windowDecoration)
 {
 	osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
 	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
@@ -112,22 +114,22 @@ void xSceneView::setModel(xSceneModel *model)
 	////	m_rootNodes->removeChild(i);
 
 	
-	//connect( m_model, SIGNAL( loadBegin(bool) ), this, SLOT( resetView(bool) ) );
-	//connect( m_model, SIGNAL( loadFinished() ), this, SLOT( resetHome() ) );
+	//connect(m_model, SIGNAL(loadBegin(bool)), this, SLOT(resetView(bool)));
+	//connect(m_model, SIGNAL(loadFinished()), this, SLOT(resetHome()));
 
-	//if (NULL != m_atm)
-	//{
-	//	connect( m_atm.get(), SIGNAL( picked(osg::Drawable*) ),this, SIGNAL( picked(osg::Drawable*) ) );
-	//	connect( m_atm.get(), SIGNAL( recenterViewTo(double,double,double) ),this, SLOT( recenterPivotPoint(double,double,double) ) );
+	if (NULL != m_pPickHandler)
+	{
+		connect(m_pPickHandler.get(), SIGNAL(sigPicked(osg::Drawable*)),this, SIGNAL(sigPicked(osg::Drawable*)));
+		//connect(m_atm.get(), SIGNAL(recenterViewTo(double,double,double)),this, SLOT(recenterPivotPoint(double,double,double)));
 
-	//	connect( m_atm.get(), SIGNAL( zoomViewIn() ),this, SLOT( showZoomIn() ) );
-	//	connect( m_atm.get(), SIGNAL( zoomViewOut() ),this, SLOT( showZoomOut() ) );
-	//	connect( m_atm.get(), SIGNAL( dragView() ),this, SLOT( showDrag() ) );
-	//	connect( m_atm.get(), SIGNAL( rotateView() ),this, SLOT( showPivot() ) );
-	//}
+		//connect(m_atm.get(), SIGNAL(zoomViewIn()),this, SLOT(showZoomIn()));
+		//connect(m_atm.get(), SIGNAL(zoomViewOut()),this, SLOT(showZoomOut()));
+		//connect(m_atm.get(), SIGNAL(dragView()),this, SLOT(showDrag()));
+		//connect(m_atm.get(), SIGNAL(rotateView()),this, SLOT(showPivot()));
+	}
 	
 
-	//m_rootNodes->addChild( m_model->getScene() );
+	//m_rootNodes->addChild(m_model->getScene());
 	
 }
 
@@ -153,7 +155,7 @@ void xSceneView::home()
 
 	// reset the pivot center point
 	//m_view->getCameraManipulator()->getHomePosition(eye, center, up);
-	//recenterPivotPoint( center.x(),center.y(),center.z() );
+	//recenterPivotPoint(center.x(),center.y(),center.z());
 
 	m_pView->home();
 }
@@ -233,7 +235,7 @@ void xSceneView::slotUpdateModel()
 	if (ptrRoot.valid())
 	{
 		osg::BoundingSphere bound = ptrRoot->getBound();
-		m_pView->getCameraManipulator()->setHomePosition(bound.center() + osg::Vec3( 1.5f * bound.radius(),1.5f * bound.radius(),1.5f * bound.radius()),
+		m_pView->getCameraManipulator()->setHomePosition(bound.center() + osg::Vec3(1.5f * bound.radius(),1.5f * bound.radius(),1.5f * bound.radius()),
 			bound.center(),	osg::Vec3(0.0f,0.0f,1.0f));
 		m_pView->home();
 	}

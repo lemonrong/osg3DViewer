@@ -33,7 +33,7 @@
     @brief Selection decorator class for selection highlighting bu shader.
  */
 
-class xShaderSelectionDecorator : public xISelectionDecorator
+class xShaderSelectionDecorator : public xSelectionDecorator
 {
 public:
 
@@ -41,7 +41,7 @@ public:
     xShaderSelectionDecorator();           //!< Constructor
     virtual ~xShaderSelectionDecorator();  //!< Destructor
 
-    virtual void traverse( osg::NodeVisitor& nv );
+    virtual void traverse(osg::NodeVisitor& nv);
 
 protected:
 

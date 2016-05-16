@@ -27,7 +27,7 @@
      <x>0</x>
      <y>0</y>
      <width>874</width>
-     <height>26</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -59,8 +59,16 @@
     <addaction name="actionHighLight"/>
     <addaction name="actionShadow"/>
    </widget>
+   <widget class="QMenu" name="menuShader">
+    <property name="title">
+     <string>Shader</string>
+    </property>
+    <addaction name="actionLoad_Shader"/>
+    <addaction name="actionRemove_Shader"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuScene"/>
+   <addaction name="menuShader"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="fileToolBar">
@@ -119,7 +127,7 @@
   </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="../res/osg3DViewer.qrc">
+    <iconset>
      <normaloff>:/osg3DViewer/open.png</normaloff>:/osg3DViewer/open.png</iconset>
    </property>
    <property name="text">
@@ -128,7 +136,7 @@
   </action>
   <action name="actionUnload">
    <property name="icon">
-    <iconset resource="../res/osg3DViewer.qrc">
+    <iconset>
      <normaloff>:/osg3DViewer/unload.png</normaloff>:/osg3DViewer/unload.png</iconset>
    </property>
    <property name="text">
@@ -137,7 +145,7 @@
   </action>
   <action name="actionSave_As">
    <property name="icon">
-    <iconset resource="../res/osg3DViewer.qrc">
+    <iconset>
      <normaloff>:/osg3DViewer/icon_save.png</normaloff>:/osg3DViewer/icon_save.png</iconset>
    </property>
    <property name="text">
@@ -146,7 +154,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset resource="../res/osg3DViewer.qrc">
+    <iconset>
      <normaloff>:/osg3DViewer/quit.png</normaloff>:/osg3DViewer/quit.png</iconset>
    </property>
    <property name="text">
@@ -155,7 +163,7 @@
   </action>
   <action name="actionReset_View">
    <property name="icon">
-    <iconset resource="../res/osg3DViewer.qrc">
+    <iconset>
      <normaloff>:/osg3DViewer/center.png</normaloff>:/osg3DViewer/center.png</iconset>
    </property>
    <property name="text">
@@ -167,7 +175,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/osg3DViewer.qrc">
+    <iconset>
      <normaloff>:/osg3DViewer/texture_on.png</normaloff>:/osg3DViewer/texture_on.png</iconset>
    </property>
    <property name="text">
@@ -179,7 +187,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/osg3DViewer.qrc">
+    <iconset>
      <normaloff>:/osg3DViewer/light_on.png</normaloff>:/osg3DViewer/light_on.png</iconset>
    </property>
    <property name="text">
@@ -191,7 +199,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/osg3DViewer.qrc">
+    <iconset>
      <normaloff>:/osg3DViewer/highlight_on.png</normaloff>:/osg3DViewer/highlight_on.png</iconset>
    </property>
    <property name="text">
@@ -203,7 +211,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/osg3DViewer.qrc">
+    <iconset>
      <normaloff>:/osg3DViewer/icon_shadow_on.png</normaloff>:/osg3DViewer/icon_shadow_on.png</iconset>
    </property>
    <property name="text">
@@ -215,11 +223,21 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../res/osg3DViewer.qrc">
+    <iconset>
      <normaloff>:/osg3DViewer/fullscreen.png</normaloff>:/osg3DViewer/fullscreen.png</iconset>
    </property>
    <property name="text">
     <string>Full Screen</string>
+   </property>
+  </action>
+  <action name="actionLoad_Shader">
+   <property name="text">
+    <string>Load Shader</string>
+   </property>
+  </action>
+  <action name="actionRemove_Shader">
+   <property name="text">
+    <string>Remove Shader</string>
    </property>
   </action>
  </widget>

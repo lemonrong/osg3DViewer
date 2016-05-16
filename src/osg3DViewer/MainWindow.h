@@ -32,6 +32,7 @@ class xSceneView;
 class xSceneModel;
 class xTreeModel;
 class xTreeView;
+class xPropertyWidget;
 
 #include "ui_MainWindow.h"
 
@@ -46,7 +47,6 @@ public:
     bool loadFile(const QString &file);
 
 public slots:
-
     void on_actionQuit_triggered();
     void on_actionOpen_triggered();
 	void on_actionUnload_triggered();
@@ -62,17 +62,16 @@ public slots:
 	void on_actionShadow_triggered(bool val);
 
 	void slotTreeNodeSelected(const QModelIndex &index);
+	void slotSelectTreeItem(osg::Drawable *);
 
 protected slots:
-
     void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);
     void dropEvent(QDropEvent *event);
     void closeEvent(QCloseEvent *event);
 
 signals:
-
-    void newFileToLoad(const QString &);
+    void sigNewFileToLoad(const QString &);
 
 private:
 	void saveSettings();
@@ -107,6 +106,7 @@ private:
     // display aspect ratio of the central windows
     QLabel *m_aspectRatioLabel;
 
+	xPropertyWidget *m_pPropertyWidget;
 };
 
 #endif 

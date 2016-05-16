@@ -27,13 +27,13 @@
     Constructor
  */
 
-xISelectionDecorator::xISelectionDecorator() : m_bEnable(false)
+xSelectionDecorator::xSelectionDecorator() : m_bEnable(false)
 {}
 
 /*!
     Destructor
  */
-xISelectionDecorator::~xISelectionDecorator()
+xSelectionDecorator::~xSelectionDecorator()
 {
 }
 
@@ -41,7 +41,7 @@ xISelectionDecorator::~xISelectionDecorator()
     Enable or disable selection highlighting.
     @param[in] enable Enable state.
  */
-void xISelectionDecorator::setEnable(bool enable)
+void xSelectionDecorator::setEnable(bool enable)
 {
     m_bEnable = enable;
 
@@ -55,20 +55,20 @@ void xISelectionDecorator::setEnable(bool enable)
     Return 'true' if selection highlighting is enabled.
     @return Enable state.
  */
-bool xISelectionDecorator::getEnable() const
+bool xSelectionDecorator::getEnable() const
 {
     return m_bEnable;
 }
 
-void xISelectionDecorator::traverse( osg::NodeVisitor& nv )
+void xSelectionDecorator::traverse(osg::NodeVisitor& nv)
 {
-    osg::Group::traverse( nv );
+    osg::Group::traverse(nv);
 }
 
 /*!
     Constructor
  */
-xDefaultSelectionDecorator::xDefaultSelectionDecorator() : xISelectionDecorator()
+xDefaultSelectionDecorator::xDefaultSelectionDecorator() : xSelectionDecorator()
 {
     // create highlighting state
     m_pStateSet = new osg::StateSet;
@@ -83,12 +83,12 @@ xDefaultSelectionDecorator::xDefaultSelectionDecorator() : xISelectionDecorator(
     m_pLineWidth->setWidth(4.0f);
     m_pStateSet->setAttributeAndModes(m_pLineWidth.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
     m_pMaterial = new osg::Material;
-    m_pMaterial->setDiffuse( osg::Material::FRONT_AND_BACK,osg::Vec4(1.0, 0.0, 0.0, 1.0) );
+    m_pMaterial->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4(1.0, 0.0, 0.0, 1.0));
     m_pMaterial->setColorMode(osg::Material::DIFFUSE);
     m_pStateSet->setAttributeAndModes(m_pMaterial.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
     m_pStateSet->setMode(GL_LIGHTING, osg::StateAttribute::OVERRIDE | osg::StateAttribute::OFF);
     m_pStateSet->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::OVERRIDE | osg::StateAttribute::OFF);
-    setStateSet( m_pStateSet.get() );
+    setStateSet(m_pStateSet.get());
 
     setEnable(true);
 }
@@ -196,7 +196,7 @@ osg::Vec4 xDefaultSelectionDecorator::getEmissionColor() const
  */
 void xDefaultSelectionDecorator::setTexturing(bool texturing)
 {
-    m_pStateSet->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OVERRIDE | ( texturing ? (osg::StateAttribute::ON): (osg::StateAttribute::OFF) ) );
+    m_pStateSet->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::OVERRIDE | (texturing ? (osg::StateAttribute::ON): (osg::StateAttribute::OFF)));
 }
 
 /*!
@@ -214,7 +214,7 @@ bool xDefaultSelectionDecorator::getTexturing() const
  */
 void xDefaultSelectionDecorator::setLighting(bool lighting)
 {
-    m_pStateSet->setMode( GL_LIGHTING, osg::StateAttribute::OVERRIDE | ( lighting ? (osg::StateAttribute::ON): (osg::StateAttribute::OFF) ) );
+    m_pStateSet->setMode(GL_LIGHTING, osg::StateAttribute::OVERRIDE | (lighting ? (osg::StateAttribute::ON): (osg::StateAttribute::OFF)));
 }
 
 /*!

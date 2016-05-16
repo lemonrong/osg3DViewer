@@ -28,7 +28,7 @@
 #include <osg/Material>
 #include <osg/Geometry>
 
-class xISelectionDecorator;
+class xSelectionDecorator;
 
 class xSelectionManager
 {
@@ -49,16 +49,16 @@ public:
     const osg::Geometry* getSelectedGeometry() const;                    //!< Return the current selected geometry.
 
     // Replace and get the selection decorator
-    void setSelectionDecorator(xISelectionDecorator* pDecorator);         //!< Replace the selection decorator for highlighting.
-    xISelectionDecorator* getSelectionDecorator();                        //!< Return the selection decorator.
-    const xISelectionDecorator* getSelectionDecorator() const;            //!< Return the selection decorator.
+    void setSelectionDecorator(xSelectionDecorator* pDecorator);         //!< Replace the selection decorator for highlighting.
+    xSelectionDecorator* getSelectionDecorator();                        //!< Return the selection decorator.
+    const xSelectionDecorator* getSelectionDecorator() const;            //!< Return the selection decorator.
 
 protected:
 
     osg::ref_ptr<osg::Node> m_pSelectedNode;    //!< Selected node
     osg::ref_ptr<osg::Geometry> m_pSelectedGeometry;    //!< Selected geometry
 
-    osg::ref_ptr<xISelectionDecorator> m_pSelectionDecorator;    //!< Decorator node for highlighting
+    osg::ref_ptr<xSelectionDecorator> m_pSelectionDecorator;    //!< Decorator node for highlighting
 };
 
 #endif // _OSG3DVIEWER_SELECTIONMANAGER_H
