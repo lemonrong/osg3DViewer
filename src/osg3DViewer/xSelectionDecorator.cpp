@@ -72,20 +72,20 @@ xDefaultSelectionDecorator::xDefaultSelectionDecorator() : xSelectionDecorator()
 {
     // create highlighting state
     m_pStateSet = new osg::StateSet;
-    m_pPolyOffset = new osg::PolygonOffset;
-    m_pPolyOffset->setFactor(-1.0f);
-    m_pPolyOffset->setUnits(-1.0f);
-    m_pPolyMode = new osg::PolygonMode;
-    m_pPolyMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
-    m_pStateSet->setAttributeAndModes(m_pPolyOffset.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
-    m_pStateSet->setAttributeAndModes(m_pPolyMode.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
-    m_pLineWidth = new osg::LineWidth;
-    m_pLineWidth->setWidth(4.0f);
-    m_pStateSet->setAttributeAndModes(m_pLineWidth.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
-    m_pMaterial = new osg::Material;
-    m_pMaterial->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4(1.0, 0.0, 0.0, 1.0));
-    m_pMaterial->setColorMode(osg::Material::DIFFUSE);
-    m_pStateSet->setAttributeAndModes(m_pMaterial.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+    m_ptrPolyOffset = new osg::PolygonOffset;
+    m_ptrPolyOffset->setFactor(-1.0f);
+    m_ptrPolyOffset->setUnits(-1.0f);
+    m_ptrPolyMode = new osg::PolygonMode;
+    m_ptrPolyMode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+    m_pStateSet->setAttributeAndModes(m_ptrPolyOffset.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+    m_pStateSet->setAttributeAndModes(m_ptrPolyMode.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+    m_ptrLineWidth = new osg::LineWidth;
+    m_ptrLineWidth->setWidth(4.0f);
+    m_pStateSet->setAttributeAndModes(m_ptrLineWidth.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+    m_ptrMaterial = new osg::Material;
+    m_ptrMaterial->setDiffuse(osg::Material::FRONT_AND_BACK,osg::Vec4(1.0, 0.0, 0.0, 1.0));
+    m_ptrMaterial->setColorMode(osg::Material::DIFFUSE);
+    m_pStateSet->setAttributeAndModes(m_ptrMaterial.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
     m_pStateSet->setMode(GL_LIGHTING, osg::StateAttribute::OVERRIDE | osg::StateAttribute::OFF);
     m_pStateSet->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::OVERRIDE | osg::StateAttribute::OFF);
     setStateSet(m_pStateSet.get());
@@ -106,7 +106,7 @@ xDefaultSelectionDecorator::~xDefaultSelectionDecorator()
  */
 void xDefaultSelectionDecorator::setOffsetFactor(float factor)
 {
-    m_pPolyOffset->setFactor(factor);
+    m_ptrPolyOffset->setFactor(factor);
 }
 
 /*!
@@ -115,7 +115,7 @@ void xDefaultSelectionDecorator::setOffsetFactor(float factor)
  */
 float xDefaultSelectionDecorator::getOffsetFactor() const
 {
-    return m_pPolyOffset->getFactor();
+    return m_ptrPolyOffset->getFactor();
 }
 
 /*!
@@ -124,7 +124,7 @@ float xDefaultSelectionDecorator::getOffsetFactor() const
  */
 void xDefaultSelectionDecorator::setOffsetUnits(float units)
 {
-    m_pPolyOffset->setUnits(units);
+    m_ptrPolyOffset->setUnits(units);
 }
 
 /*!
@@ -133,7 +133,7 @@ void xDefaultSelectionDecorator::setOffsetUnits(float units)
  */
 float xDefaultSelectionDecorator::getOffsetUnits() const
 {
-    return m_pPolyOffset->getUnits();
+    return m_ptrPolyOffset->getUnits();
 }
 
 /*!
@@ -142,7 +142,7 @@ float xDefaultSelectionDecorator::getOffsetUnits() const
  */
 void xDefaultSelectionDecorator::setPolygonMode(osg::PolygonMode::Mode mode)
 {
-    m_pPolyMode->setMode(osg::PolygonMode::FRONT_AND_BACK, mode);
+    m_ptrPolyMode->setMode(osg::PolygonMode::FRONT_AND_BACK, mode);
 }
 
 /*!
@@ -151,7 +151,7 @@ void xDefaultSelectionDecorator::setPolygonMode(osg::PolygonMode::Mode mode)
  */
 osg::PolygonMode::Mode xDefaultSelectionDecorator::getPolygonMode() const
 {
-    return m_pPolyMode->getMode(osg::PolygonMode::FRONT_AND_BACK);
+    return m_ptrPolyMode->getMode(osg::PolygonMode::FRONT_AND_BACK);
 }
 
 /*!
@@ -160,7 +160,7 @@ osg::PolygonMode::Mode xDefaultSelectionDecorator::getPolygonMode() const
  */
 void xDefaultSelectionDecorator::setLineWidth(float width)
 {
-    m_pLineWidth->setWidth(width);
+    m_ptrLineWidth->setWidth(width);
 }
 
 /*!
@@ -169,7 +169,7 @@ void xDefaultSelectionDecorator::setLineWidth(float width)
  */
 float xDefaultSelectionDecorator::getLineWidth() const
 {
-    return m_pLineWidth->getWidth();
+    return m_ptrLineWidth->getWidth();
 }
 
 /*!
@@ -178,7 +178,7 @@ float xDefaultSelectionDecorator::getLineWidth() const
  */
 void xDefaultSelectionDecorator::setEmissionColor(osg::Vec4 color)
 {
-    m_pMaterial->setEmission(osg::Material::FRONT_AND_BACK, color);
+    m_ptrMaterial->setEmission(osg::Material::FRONT_AND_BACK, color);
 }
 
 /*!
@@ -187,7 +187,7 @@ void xDefaultSelectionDecorator::setEmissionColor(osg::Vec4 color)
  */
 osg::Vec4 xDefaultSelectionDecorator::getEmissionColor() const
 {
-    return m_pMaterial->getEmission(osg::Material::FRONT_AND_BACK);
+    return m_ptrMaterial->getEmission(osg::Material::FRONT_AND_BACK);
 }
 
 /*!

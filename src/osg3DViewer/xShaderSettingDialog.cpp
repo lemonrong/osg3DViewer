@@ -40,7 +40,7 @@ void xShaderSettingDialog::slotLoadVertexShader()
 }
 void xShaderSettingDialog::slotLoadFragmentShader()
 {
-	QString strShaderFile = QFileDialog::getOpenFileName(this, tr("Select fragment shader file"),  "", tr("Fragment Shader Files (*.vs)"));
+	QString strShaderFile = QFileDialog::getOpenFileName(this, tr("Select fragment shader file"),  "", tr("Fragment Shader Files (*.fs)"));
 	if (strShaderFile.isEmpty())
 		return;
 	ui.lineEdit_fragmentShader->setText(strShaderFile);

@@ -29,7 +29,7 @@
 xSelectionManager::xSelectionManager()
 {
     // create a selection decorator for highlighting.
-    m_pSelectionDecorator = new xDefaultSelectionDecorator;
+    m_ptrSelectionDecorator = new xDefaultSelectionDecorator;
 }
 
 /*!
@@ -41,11 +41,11 @@ xSelectionManager::~xSelectionManager()
 void xSelectionManager::clearSelection()
 {
     // deselect the previous selected node
-    while (m_pSelectionDecorator->getNumChildren() > 0)
-        m_pSelectionDecorator->removeChild(0,1);
+    while (m_ptrSelectionDecorator->getNumChildren() > 0)
+        m_ptrSelectionDecorator->removeChild(0,1);
 
-    if (m_pSelectionDecorator->getNumParents() > 0)
-        m_pSelectionDecorator->getParent(0)->removeChild(m_pSelectionDecorator.get());
+    if (m_ptrSelectionDecorator->getNumParents() > 0)
+        m_ptrSelectionDecorator->getParent(0)->removeChild(m_ptrSelectionDecorator.get());
 }
 
 /*!
@@ -58,18 +58,18 @@ bool xSelectionManager::select(osg::Node* pNode)
     // select the new node
     if (pNode)
     {
-        m_pSelectionDecorator->addChild(pNode);
+        m_ptrSelectionDecorator->addChild(pNode);
 
         osg::Group* pParent = pNode->getParent(0);
 
         if (pParent)
         {
-            pParent->addChild(m_pSelectionDecorator.get());
+            pParent->addChild(m_ptrSelectionDecorator.get());
         }
     }
 
     // keep the pointer of the selected node
-    m_pSelectedNode = pNode;
+    m_ptrSelectedNode = pNode;
 
     return (pNode!=NULL);
 }
@@ -93,16 +93,16 @@ bool xSelectionManager::select(osg::Geometry* pGeom)
 
         newparent->addDrawable(newgeom);
 
-        m_pSelectionDecorator->addChild(newparent);
+        m_ptrSelectionDecorator->addChild(newparent);
 
         osg::Node* pParent = pGeom->getParent(0);
 
         if (pParent)
-            pParent->getParent(0)->addChild(m_pSelectionDecorator.get());
+            pParent->getParent(0)->addChild(m_ptrSelectionDecorator.get());
     }
 
     // keep the pointer of the selected node
-    m_pSelectedGeometry = pGeom;
+    m_ptrSelectedGeometry = pGeom;
 
     return (pGeom!=NULL);
 }
@@ -113,7 +113,7 @@ bool xSelectionManager::select(osg::Geometry* pGeom)
  */
 osg::Node* xSelectionManager::getSelectedNode()
 {
-    return m_pSelectedNode.get();
+    return m_ptrSelectedNode.get();
 }
 
 /*!
@@ -122,7 +122,7 @@ osg::Node* xSelectionManager::getSelectedNode()
  */
 osg::Geometry* xSelectionManager::getSelectedGeometry()
 {
-    return m_pSelectedGeometry.get();
+    return m_ptrSelectedGeometry.get();
 }
 
 /*!
@@ -131,7 +131,7 @@ osg::Geometry* xSelectionManager::getSelectedGeometry()
  */
 const osg::Node* xSelectionManager::getSelectedNode() const
 {
-    return m_pSelectedNode.get();
+    return m_ptrSelectedNode.get();
 }
 
 /*!
@@ -140,7 +140,7 @@ const osg::Node* xSelectionManager::getSelectedNode() const
  */
 const osg::Geometry* xSelectionManager::getSelectedGeometry() const
 {
-    return m_pSelectedGeometry.get();
+    return m_ptrSelectedGeometry.get();
 }
 
 /*!
@@ -152,8 +152,8 @@ void xSelectionManager::setSelectionDecorator(xSelectionDecorator* pDecorator)
     if (!pDecorator)
         return;
 
-    m_pSelectionDecorator = pDecorator;
-    select(m_pSelectedNode.get());
+    m_ptrSelectionDecorator = pDecorator;
+    select(m_ptrSelectedNode.get());
 }
 
 /*!
@@ -162,7 +162,7 @@ void xSelectionManager::setSelectionDecorator(xSelectionDecorator* pDecorator)
  */
 xSelectionDecorator* xSelectionManager::getSelectionDecorator()
 {
-    return m_pSelectionDecorator.get();
+    return m_ptrSelectionDecorator.get();
 }
 
 /*!
@@ -171,5 +171,5 @@ xSelectionDecorator* xSelectionManager::getSelectionDecorator()
  */
 const xSelectionDecorator* xSelectionManager::getSelectionDecorator() const
 {
-    return m_pSelectionDecorator.get();
+    return m_ptrSelectionDecorator.get();
 }

@@ -18,53 +18,41 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *******************************************************************************/
 
-#ifndef _XPROPERTYWIDGET_H_
-#define _XPROPERTYWIDGET_H_
+#ifndef _XTHREADPOOL_H_
+#define _XTHREADPOOL_H_
 
-#include <QtCore/QString>
-#include <QtGui/QScrollArea>
-#include <QtCore/QMap>
+// this class provide a way to get access to the thread pool
 
-#include <osg/Node>
-#include <osg/Switch>
-#include <osg/LOD>
-#include <osg/Geode>
+#include <QtCore/QObject>
+#include <QtCore/QMutex>
+#include <QtCore/QThread>
+#include <QtCore/QList>
 
-#include "qttreepropertybrowser.h"
-#include "qtvariantproperty.h"
-
-class xPropertyWidget : public QtTreePropertyBrowser
+class xThreadPool : public QObject
 {
     Q_OBJECT
-
 public:
+    static xThreadPool* getInstance();
+    ~xThreadPool()
+    {
+        instanceFlag = false;
+    }
 
-    xPropertyWidget(QWidget *parent = 0);
-    ~xPropertyWidget() {}
+    void stop();
 
-    void displayProperties(osg::Node *);
-    void displayNodeProperties(osg::Node *node);
-    void displayLODProperties(osg::LOD *);
-    void displaySwitchProperties(osg::Switch *);
-    void displayGeodeProperties(osg::Geode *node);
-    void displayBaseStats(osg::Node *);
-
-public slots:
-
-signals:
-
-protected:
+    QThread *getThread();
+    QThread *getReservedThread();
 
 private:
-    void initDictionaries();
+	static bool instanceFlag;
+	static xThreadPool *single;
 
-    QString m_file;
+	QList<QThread *> m_threadPool;
+	QList<QThread *> m_reservedThreadPool;
 
-    QtVariantPropertyManager *m_pVariantManager;
+	QMutex m_lock;
 
-    QList<QString> m_listDataVariance;
-    QList<QString> m_listCenterMode;
-    QList<QString> m_listRangeMode;
+	xThreadPool(); //private constructor
 };
 
-#endif // _PROPERTYWIDGET_H_
+#endif // _THREADPOOL_H_

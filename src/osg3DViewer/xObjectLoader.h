@@ -18,53 +18,32 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *******************************************************************************/
 
-#ifndef _XPROPERTYWIDGET_H_
-#define _XPROPERTYWIDGET_H_
+#ifndef _XOBJECT_LOADER_H_
+#define _XOBJECT_LOADER_H_
 
-#include <QtCore/QString>
-#include <QtGui/QScrollArea>
-#include <QtCore/QMap>
+#include <QtCore/QObject>
 
 #include <osg/Node>
-#include <osg/Switch>
-#include <osg/LOD>
-#include <osg/Geode>
 
-#include "qttreepropertybrowser.h"
-#include "qtvariantproperty.h"
-
-class xPropertyWidget : public QtTreePropertyBrowser
+class xObjectLoader : public QObject
 {
     Q_OBJECT
 
 public:
-
-    xPropertyWidget(QWidget *parent = 0);
-    ~xPropertyWidget() {}
-
-    void displayProperties(osg::Node *);
-    void displayNodeProperties(osg::Node *node);
-    void displayLODProperties(osg::LOD *);
-    void displaySwitchProperties(osg::Switch *);
-    void displayGeodeProperties(osg::Geode *node);
-    void displayBaseStats(osg::Node *);
+    xObjectLoader(QObject *parent = 0);
+    virtual ~xObjectLoader(){}
 
 public slots:
+    void slotNewObjectToLoad(const QString &);
+    void slotSetOptimization(bool val) {m_bOptimize = val; }
 
 signals:
-
-protected:
+    void sigNewObjectToView(osg::Node *);
 
 private:
-    void initDictionaries();
-
     QString m_file;
-
-    QtVariantPropertyManager *m_pVariantManager;
-
-    QList<QString> m_listDataVariance;
-    QList<QString> m_listCenterMode;
-    QList<QString> m_listRangeMode;
+    osg::ref_ptr<osg::Node> m_ptrLoadedModel;
+    bool m_bOptimize;
 };
 
-#endif // _PROPERTYWIDGET_H_
+#endif // _SCREENSHOT_HANDLER_H_

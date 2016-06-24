@@ -137,7 +137,7 @@ bool xShaderSelectionDecorator::loadShader()
     std::string vertShaderSource = osgDB::findDataFile("highlight.vert");
 
     success = vertShader->loadShaderSourceFromFile(vertShaderSource);
-    if (!success )
+    if (!success)
     {
         std::cout << "Couldn't load file: " << vertShaderSource << std::endl;
         return success;
@@ -146,7 +146,7 @@ bool xShaderSelectionDecorator::loadShader()
     osg::Shader *fragShader = new osg::Shader(osg::Shader::FRAGMENT);
     std::string fragShaderSource = osgDB::findDataFile("highlight.frag");
     success = fragShader->loadShaderSourceFromFile(fragShaderSource);
-    if (!success )
+    if (!success)
     {
         std::cout << "Couldn't load file: " << fragShaderSource << std::endl;
         return success;

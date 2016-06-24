@@ -18,8 +18,8 @@
  *******************************************************************************/
 
 #include "MainWindow.h"
-//#include "AppSettings.h"
-//#include "LogHandler.h"
+#include "xAppSettings.h"
+#include "xLogHandler.h"
 
 #ifdef WIN32
 #include <direct.h>
@@ -50,10 +50,11 @@
 #include "xTreeModel.h"
 #include "xTreeView.h"
 #include "xPropertyWidget.h"
+#include "xSearchLineEdit.h"
 
 //#include "PreferencesWidget.h"
-//#include "ThreadPool.h"
-//#include "ObjectLoader.h"
+#include "xThreadPool.h"
+#include "xObjectLoader.h"
 //#include "SceneViewState.h"
 //#include "BookmarkItem.h"
 //#include "BookmarkDialog.h"
@@ -62,11 +63,7 @@
 
 //#include "MiscFunctions.h"
 //
-//#include "FindNameListVisitor.h"
-
-#define PACKAGE_ORGANIZATION "Lemon Rong"
-#define PACKAGE_NAME "osg3DViewer"
-#define PACKAGE_VERSION "1.0.0"
+#include "xFindNameListVisitor.h"
 
 const int maxRecentlyOpenedFile = 10;
 
@@ -76,8 +73,8 @@ MainWindow::MainWindow(QWidget *parent)
 	m_pTreeView(NULL),
     //m_currentSnapshotNum(0),
     //m_lastSnapshotName("snapshot"),
-    //m_appName(PACKAGE_NAME),
-    //m_version(PACKAGE_VERSION),
+    m_appName(PACKAGE_NAME),
+    m_version(PACKAGE_VERSION),
     //m_recentFilesMenu(NULL),
     //m_logLevel(LogHandler::LOG_DEBUG),
     //m_splashscreenAtStartup(true),
@@ -88,15 +85,15 @@ MainWindow::MainWindow(QWidget *parent)
     //m_inverseMouseWheel(false),
     //m_displayTrackballHelper(false),
     //m_optimize(false),
-    
-    m_pSceneModel(NULL)
-    //m_LODFactorLabel(NULL),
-    //m_LODFactor(1.0f),
+    m_pLineEditSearch(NULL),
+    m_pSceneModel(NULL),
+    m_pLODFactorLabel(NULL),
+    m_fLODFactor(1.0f),
     //m_prefs(NULL),
-    //m_bgLoader(NULL),
-    //m_aspectRatioLabel(NULL),
-    //m_caseSensitive(false),
-    //m_completerSearch(0),
+    m_pObjectLoader(NULL),
+    m_pAspectRatioLabel(NULL),
+    m_bCaseSensitive(false),
+    m_pCompleterSearch(0)
     //m_typeSnapshot(SNAPSHOT_FOR_FILE),
     //m_bmkDialog(NULL),
     //m_posterDialog(NULL),
@@ -134,56 +131,65 @@ void MainWindow::updateUi()
     connect(ui.menuFile, SIGNAL(aboutToShow()), this, SLOT(setupRecentFilesMenu()));
     connect(ui.menuRecent_Files, SIGNAL(triggered(QAction*)), this, SLOT(recentFileActivated(QAction*)));
 
-    //// create the log handler
-    //connect(LogHandler::getInstance(),SIGNAL(newMessage(const QString &)),this,SLOT(printToLog(const QString &)));
-    //connect(LogHandler::getInstance(),SIGNAL(newMessages(const QStringList &)),this,SLOT(printToLog(const QStringList &)));
-    //LogHandler::getInstance()->startEmission(true); // start log emission
+    // create the log handler
+    connect(xLogHandler::getInstance(),SIGNAL(sigNewMessage(const QString &)),this,SLOT(slotPrintToLog(const QString &)));
+    connect(xLogHandler::getInstance(),SIGNAL(sigNewMessages(const QStringList &)),this,SLOT(slotPrintToLog(const QStringList &)));
+    xLogHandler::getInstance()->startEmission(true); // start log emission
 
-    //// limit log display
-    //ui->textBrowserLog->document()->setMaximumBlockCount(1000);
+    // limit log display
+    ui.textBrowserLog->document()->setMaximumBlockCount(1000);
 
     // create tree model
     m_pTreeModel = new xTreeModel(this);
-	m_pTreeView = new xTreeView(this);
+	m_pTreeView = new xTreeView(ui.dockWidget_Model);
 	m_pTreeView->setModel(m_pTreeModel);
+	m_pSceneView->installEventFilter(this);
 	connect(m_pTreeView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotTreeNodeSelected(const QModelIndex &)), Qt::UniqueConnection);
 	//QVBoxLayout *pTreeWidgetLayout = new QVBoxLayout(this);
 	
+	QWidget *pStructureWidget = new QWidget(ui.dockWidget_Model);
+	ui.dockWidget_Model->setWidget(pStructureWidget);
+	QVBoxLayout *pTreeLayout = new QVBoxLayout(pStructureWidget);
+	pStructureWidget->setLayout(pTreeLayout);
+	
+	m_pLineEditSearch = new xSearchLineEdit(ui.dockWidget_Model);
+	m_pLineEditSearch->setObjectName(QString::fromUtf8("lineEditSearch"));
+	QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+	sizePolicy.setHorizontalStretch(0);
+	sizePolicy.setVerticalStretch(0);
+	sizePolicy.setHeightForWidth(m_pLineEditSearch->sizePolicy().hasHeightForWidth());
+	m_pLineEditSearch->setSizePolicy(sizePolicy);
+	connect(m_pLineEditSearch, SIGNAL(sigCaseSensitiveToggled(bool)), this, SLOT(slotSearchCaseSensitiveToggled(bool)), Qt::UniqueConnection);
+	connect(m_pLineEditSearch, SIGNAL(returnPressed()), this, SLOT(slotEditSearchReturnPressed()), Qt::UniqueConnection);
 
-	ui.dockWidget_Model->setWidget(m_pTreeView);
-	//pTreeWidgetLayout->addWidget(m_pTreeView);
-    //connect(ui->treeViewStructure, SIGNAL(clicked (const QModelIndex &)), this, SLOT(nodeSelected(const QModelIndex &)));
+	pTreeLayout->addWidget(m_pLineEditSearch);
+	pTreeLayout->addWidget(m_pTreeView);
+	
+    enableActions(false);
 
-    //enableActions(false);
-
-    //// create the scene manager (scene model)
+    // create the scene manager (scene model)
 	m_pSceneModel = new xSceneModel(this);
 	m_pSceneView->setModel(m_pSceneModel);
-	connect(m_pSceneModel, SIGNAL(sigUpdateModel()), m_pSceneView, SLOT(slotUpdateModel()), Qt::UniqueConnection);
-    //m_sceneModel = new SceneModel(this);
-    //ui->widgetSceneView->setModel(m_sceneModel);
+	connect(m_pSceneModel, SIGNAL(sigLoadFinished()), m_pSceneView, SLOT(slotUpdateModel()), Qt::UniqueConnection);
 	
     //connect(ui->widgetSceneView,SIGNAL(newScreenshotAvailable(osg::Image *)),this,SLOT(takeIntoAccountScreenshot(osg::Image*)),Qt::QueuedConnection);
     connect(m_pSceneView, SIGNAL(sigPicked(osg::Drawable*)), this, SLOT(slotSelectTreeItem(osg::Drawable*)));
-    //connect(ui->widgetSceneView, SIGNAL(sigNewAspectRatio(const QSize &)), this, SLOT(changeAspectRatio(const QSize &)));
+    connect(m_pSceneView, SIGNAL(sigNewAspectRatio(const QSize &)), this, SLOT(slotChangeAspectRatio(const QSize &)));
 
-    //// install eventfilter for sceneview
-    //ui->widgetSceneView->installEventFilter(this);
+    // add a label to display the current aspect ratio of the  display (for bookmark)
+    m_pAspectRatioLabel = new QLabel(this);
+    QMainWindow::statusBar()->addPermanentWidget(m_pAspectRatioLabel);
 
-    //// add a label to display the current aspect ratio of the  display (for bookmark)
-    //m_aspectRatioLabel = new QLabel(this);
-    //QMainWindow::statusBar()->addPermanentWidget(m_aspectRatioLabel);
+    // add a label to display the LOD factor
+    m_pLODFactorLabel = new QLabel(this);
+    m_pLODFactorLabel->setText("LOD x1"); // set default value
+    QMainWindow::statusBar()->addPermanentWidget(m_pLODFactorLabel);
 
-    //// add a label to display the LOD factor
-    //m_LODFactorLabel = new QLabel(this);
-    //m_LODFactorLabel->setText("LOD x1"); // set default value
-    //QMainWindow::statusBar()->addPermanentWidget(m_LODFactorLabel);
-
-    //// create a background loader
-    //m_bgLoader = new ObjectLoader();
-    //m_bgLoader->moveToThread(ThreadPool::getInstance()->getThread());
-    //connect(this,SIGNAL(newFileToLoad(const QString &)),m_bgLoader,SLOT(newObjectToLoad(const QString &)));
-    //connect(m_bgLoader,SIGNAL(newObjectToView(osg::Node *)),this,SLOT(newLoadedFile(osg::Node *)));
+    // create a background loader
+    m_pObjectLoader = new xObjectLoader();
+    m_pObjectLoader->moveToThread(xThreadPool::getInstance()->getThread());
+    connect(this,SIGNAL(sigNewFileToLoad(const QString &)),m_pObjectLoader,SLOT(slotNewObjectToLoad(const QString &)));
+    connect(m_pObjectLoader,SIGNAL(sigNewObjectToView(osg::Node *)),this,SLOT(slotNewLoadedFile(osg::Node *)));
 
     //// bookmarks
     //connect(ui->widgetBookmarkManager,SIGNAL(newBookmarkRequest()),this,SLOT(on_actionNewBookmark_triggered()));
@@ -208,28 +214,94 @@ void MainWindow::on_actionSave_As_triggered()
 	m_pSceneModel->saveSceneData(fileName.toStdString());
 	//osgDB::writeNodeFile(*m_rootNode.get(), fileName.toStdString());
 }
+
 bool MainWindow::loadFile(const QString &file)
 {
-    if (file.isEmpty() || !QFileInfo(file).exists())
-        return false;
+	if (file.isEmpty() || !QFileInfo(file).exists())
+		return false;
 
-	m_rootNode = osgDB::readNodeFile(file.toStdString());
-	m_pSceneModel->setData(m_rootNode.get());
-	m_pTreeModel->setNode(m_rootNode.get());
-    //saveIfNeeded();
+	//saveIfNeeded();
 
-    //QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    m_currFile = file;
-    m_lastDirectory = QFileInfo(file).absolutePath();
+	m_currFile = file;
+	m_lastDirectory = QFileInfo(file).absolutePath();
+
+	// enable actions
+	enableActions(false);
+
+	emit sigNewFileToLoad(file);
+
+	return true;
+}
+
+void MainWindow::slotNewLoadedFile(osg::Node *node)
+{
+	// reset the cursor
+	QApplication::restoreOverrideCursor();
+
+	resetViews(true);
+
+	if (!node)
+	{
+		return;
+	}
+
+	m_pSceneModel->setData(node);
+
+	// update the window title
+	setWindowTitle(m_appName + " " + m_version + " - " + QFileInfo(m_currFile).fileName());
 	addRecentlyOpenedFile(m_currFile, m_recentFiles);
-	setupRecentFilesMenu();
-    //// enable actions
-    //enableActions(false);
 
-    //emit newFileToLoad(file);
+	// reset the cursor
+	QApplication::restoreOverrideCursor();
 
-    return true;
+	// enable actions
+	enableActions(true);
+
+	m_pTreeModel->setNode(node);
+
+	// arrange display
+	QModelIndex i = m_pTreeModel->index(0, 0, m_pTreeView->rootIndex());
+	m_pTreeView->setExpanded(i,true);
+	m_pTreeView->resizeColumnToContents(0);
+
+	// update completer for find
+	delete m_pCompleterSearch;
+
+	xFindNameListVisitor visit;
+	node->accept(visit);
+
+	QStringList nameList = visit.getNameList();
+	nameList.removeDuplicates();
+
+	m_pCompleterSearch = new QCompleter(nameList, this);
+	m_pLineEditSearch->setCompleter(m_pCompleterSearch);
+	if (m_bCaseSensitive)
+		m_pCompleterSearch->setCaseSensitivity(Qt::CaseSensitive);
+	else
+		m_pCompleterSearch->setCaseSensitivity(Qt::CaseInsensitive);
+
+	// display stats
+	m_pPropertyWidget->displayProperties(node);
+
+	// init current index
+	m_currSearchIndex = QModelIndex();
+
+	//// check for bookmark file
+	//QFileInfo fi(m_currFile);
+	//QFileInfo bmk(fi.absolutePath() + "/" + fi.baseName() + ".bmk");
+	//if (bmk.exists())
+	//{
+	//	if (ui->widgetBookmarkManager->loadBookmark(bmk.absoluteFilePath()))
+	//	{
+	//		LogHandler::getInstance()->reportInfo(tr("Loading of %1 ...").arg(bmk.absoluteFilePath()));
+	//	}
+	//	else
+	//	{
+	//		LogHandler::getInstance()->reportInfo(tr("Nothing to load in %1 ...").arg(bmk.absoluteFilePath()));
+	//	}
+	//}
 }
 
 void MainWindow::addRecentlyOpenedFile(const QString &fn, QStringList &lst)
@@ -288,9 +360,8 @@ void MainWindow::enableActions(bool val)
 
     //ui->widgetBookmarkManager->setEnabled(val);
     //ui->widgetStats->setEnabled(val);
-    //ui->widgetProperties->setEnabled(val);
-    //ui->treeDockContents->setEnabled(val);
-	m_pPropertyWidget->setEnabled(val);
+    ui.dockWidget_Model->setEnabled(val);
+    ui.dockWidget_Properties->setEnabled(val);
 }
 
 
@@ -364,8 +435,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
     //    return; // cancel triggered !!
     //}
 
-    // just in case => restore the dockWidgets
-    //showDockWidgets();
+     //just in case => restore the dockWidgets
+    showDockWidgets();
 }
 
 void MainWindow::updateApplicationIdentity()
@@ -390,8 +461,8 @@ void MainWindow::on_actionUnload_triggered()
     m_pSceneModel->setData(NULL);
 	m_pTreeModel->setNode(NULL);
 
-    //// disable actions because no more current file !!
-    //enableActions(false);
+    // disable actions because no more current file !!
+    enableActions(false);
 }
 
 void MainWindow::saveSettings()
@@ -431,7 +502,7 @@ void MainWindow::saveSettings()
 
 void MainWindow::loadSettings()
 {
-	QSettings settings(PACKAGE_ORGANIZATION, PACKAGE_NAME);
+	xAppSettings settings;
 
 	settings.beginGroup("MainWindow");
 
@@ -523,7 +594,35 @@ void MainWindow::on_actionHighLight_triggered(bool val)
 {
 	m_pSceneView->setHighlightScene(val);
 }
+void MainWindow::on_pushButtonClearLog_pressed()
+{
+	ui.textBrowserLog->clear();
+}
 
+void MainWindow::on_pushButtonSaveLog_pressed()
+{
+	QString logFile = QFileDialog::getSaveFileName(
+		this,
+		tr("Log file"),
+		m_lastDirectory,
+		"Log file (*.log)");
+
+	if (logFile.isEmpty())
+		return;
+
+	m_lastDirectory = QFileInfo(logFile).absolutePath(); // save current directory
+
+	QFile file(logFile);
+
+	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		xLogHandler::getInstance()->slotReportError(tr("Can't save log file !!: %1").arg(logFile));
+	}
+
+	QTextStream out(&file);
+	out << ui.textBrowserLog->document()->toPlainText();
+	file.close();
+}
 void MainWindow::showDockWidgets()
 {
 	QMainWindow::menuBar()->show();
@@ -575,4 +674,142 @@ void MainWindow::slotSelectTreeItem(osg::Drawable *pDrawable)
 		m_pTreeView->resizeColumnToContents(0);
 		slotTreeNodeSelected(parentIndex);
 	}
+}
+
+void MainWindow::resetViews(bool allClear)
+{
+	// clear current bookmark
+	//ui->widgetBookmarkManager->clearBookmark();
+
+	m_pSceneView->resetSelection();
+
+	// reset 3d view
+	if (allClear)
+	{
+		m_pTreeModel->setNode(NULL);
+		m_pSceneModel->setData(NULL);
+	}
+}
+void MainWindow::slotPrintToLog(const QString & mess)
+{
+	ui.textBrowserLog->append(mess);
+}
+
+void MainWindow::slotPrintToLog(const QStringList & mess)
+{
+	ui.textBrowserLog->append(mess.join("<br>"));
+}
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+	if (obj == m_pSceneView)
+	{
+		QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+		keyPressEvent(keyEvent);
+	}
+
+	return false;
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+	if(event->key() == Qt::Key_Escape)
+	{
+		if (bool(windowState() & Qt::WindowFullScreen) == true) // fullscreen mode => quit fullscreen
+		{
+			on_actionFull_Screen_triggered(false);
+			ui.actionFull_Screen->setChecked(false);
+		}
+
+		return;
+	}
+
+	bool shift = event->modifiers() & Qt::ShiftModifier;
+	bool ctrl = event->modifiers() & Qt::ControlModifier;
+	bool alt = event->modifiers() & Qt::AltModifier;
+
+	if (shift)
+	{
+		QMainWindow::statusBar()->showMessage(tr("Use Shift+Left Click to recenter view"), 5000);
+	}
+	else if (ctrl)
+	{
+		QMainWindow::statusBar()->showMessage(tr("Use Ctrl+Left Click to select element"), 5000);
+	}
+}
+void MainWindow::slotChangeAspectRatio(const QSize & sz)
+{
+	if (sz.height())
+	{
+		float ratio = sz.width() / (float)sz.height();
+		m_pAspectRatioLabel->setText(tr("View aspect ratio: %1").arg(QString::number(ratio,'g',2)));
+	}
+}
+void MainWindow::slotSearchCaseSensitiveToggled(bool checked)
+{
+	m_bCaseSensitive = checked;
+
+	if (!m_pCompleterSearch)
+		return;
+
+	if (m_bCaseSensitive)
+		m_pCompleterSearch->setCaseSensitivity(Qt::CaseSensitive);
+	else
+		m_pCompleterSearch->setCaseSensitivity(Qt::CaseInsensitive);
+}
+
+void MainWindow::slotEditSearchReturnPressed()
+{
+	QString searchText = m_pLineEditSearch->text();
+
+	if  (!m_currSearchIndex.isValid())
+	{
+		m_currSearchIndex = m_pTreeModel->index(0, 0, QModelIndex());
+		search(m_currSearchIndex,searchText);
+	}
+	else
+	{
+		// search for next valid sibling or root
+		QModelIndex node = m_currSearchIndex;
+		QModelIndex sibling;
+		bool found = false;
+		while (!found)
+		{
+			sibling = node.sibling(node.row() + 1,node.column());
+			while (!sibling.isValid())
+			{
+				node = node.parent();
+				if (!node.isValid())
+				{
+					found = true;
+					break;
+				}
+				if (node != m_pTreeModel->index(0, 0, QModelIndex()))
+					sibling = node.sibling(node.row() + 1,node.column());
+				else
+					sibling = m_pTreeModel->index(0, 0, QModelIndex());
+			}
+			if (found)
+				break;
+			found = search(sibling,searchText);
+			node = sibling;
+		}
+	}
+}
+
+bool MainWindow::search(const QModelIndex &index,const QString &name)
+{
+	m_currSearchIndex = m_pTreeModel->searchForName(name,index);
+	if (m_currSearchIndex.isValid())
+	{
+		m_pTreeView->setCurrentIndex(m_currSearchIndex);
+		m_pTreeView->scrollTo(m_currSearchIndex,QAbstractItemView::EnsureVisible);
+		m_pTreeView->resizeColumnToContents(0);
+
+		//widgetProperties->displayProperties(curritf);
+
+		slotTreeNodeSelected(m_currSearchIndex);
+		m_pSceneView->centerOnNode(reinterpret_cast<osg::Node*>(m_currSearchIndex.internalPointer()));
+		return true;
+	}
+	return false;
 }

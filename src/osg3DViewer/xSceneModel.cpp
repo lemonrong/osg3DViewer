@@ -19,8 +19,8 @@
 
  
 #include "xSceneModel.h"
-//#include "OsgLogger.h"
-//#include "LogHandler.h"
+#include "xOsgLogger.h"
+#include "xLogHandler.h"
 //#include "ExtentsVisitor.h"
 
 #include <osg/PolygonOffset>
@@ -62,10 +62,10 @@ xSceneModel::xSceneModel(QObject *parent) :
 {
     // set the osg log to QT message
     osg::setNotifyLevel(osg::NOTICE);
-    //OsgLogger *loggerCout = new OsgLogger(std::cout);
-    //connect(loggerCout, SIGNAL(message(const QString &)), LogHandler::getInstance(), SLOT(reportDebug(const QString &)),Qt::QueuedConnection);
-    //OsgLogger *loggerCerr = new OsgLogger(std::cerr);
-    //connect(loggerCerr, SIGNAL(message(const QString &)),  LogHandler::getInstance(), SLOT(reportInfo(const QString &)),Qt::QueuedConnection);
+    xOsgLogger *loggerCout = new xOsgLogger(std::cout);
+    connect(loggerCout, SIGNAL(sigMessage(const QString &)), xLogHandler::getInstance(), SLOT(slotReportDebug(const QString &)),Qt::QueuedConnection);
+    xOsgLogger *loggerCerr = new xOsgLogger(std::cerr);
+    connect(loggerCerr, SIGNAL(sigMessage(const QString &)),  xLogHandler::getInstance(), SLOT(slotReportInfo(const QString &)),Qt::QueuedConnection);
 
     //osg::setNotifyLevel(osg::DEBUG_INFO);
     //osg::setNotifyLevel(osg::NOTICE);
@@ -99,8 +99,8 @@ void xSceneModel::setHighlightScene(bool val)
 		m_pCurrentHightlight->setWireframeLineWidth(2.0);
 		m_pCurrentHightlight->setWireframeColor(osg::Vec4(1.0,1.0,1.0,1.0));
 
-		m_pCurrentHightlight->addChild(m_rootShadowNodes);
-		m_pNodeScene->replaceChild(m_rootShadowNodes, m_pCurrentHightlight);
+		m_pCurrentHightlight->addChild(m_ptrRootShadowNodes);
+		m_pNodeScene->replaceChild(m_ptrRootShadowNodes, m_pCurrentHightlight);
 	}
 	else
 	{
@@ -110,7 +110,7 @@ void xSceneModel::setHighlightScene(bool val)
 		//	itr!=parentList.end();
 		//	++itr)
 		//	(*itr)->replaceChild(parentAsScribe,parentAsScribe->getChild(0));
-		m_pNodeScene->replaceChild(m_pCurrentHightlight, m_rootShadowNodes);
+		m_pNodeScene->replaceChild(m_pCurrentHightlight, m_ptrRootShadowNodes);
 	}
 }
 
@@ -142,16 +142,16 @@ void xSceneModel::createScene()
     m_pTransformSpinScene->addChild(m_pNodeScene);
 
 	// shadow node
-	m_rootShadowNodes = new osgShadow::ShadowedScene();
-	m_rootShadowNodes->setReceivesShadowTraversalMask(receivesShadowTraversalMask);
-	m_rootShadowNodes->setCastsShadowTraversalMask(castsShadowTraversalMask);
-	m_rootShadowNodes->setDataVariance(osg::Object::DYNAMIC);
+	m_ptrRootShadowNodes = new osgShadow::ShadowedScene();
+	m_ptrRootShadowNodes->setReceivesShadowTraversalMask(receivesShadowTraversalMask);
+	m_ptrRootShadowNodes->setCastsShadowTraversalMask(castsShadowTraversalMask);
+	m_ptrRootShadowNodes->setDataVariance(osg::Object::DYNAMIC);
 
-	m_pNodeScene->addChild(m_rootShadowNodes.get());
+	m_pNodeScene->addChild(m_ptrRootShadowNodes.get());
 
 	m_pCurrentData = new osg::Node();
 	m_pCurrentData->setName("currentData");
-	m_rootShadowNodes->addChild(m_pCurrentData.get());
+	m_ptrRootShadowNodes->addChild(m_pCurrentData.get());
 
 }
 
@@ -177,11 +177,11 @@ void xSceneModel::setData(osg::Node *data, bool resetHome)
     osg::Vec3d center;
 
     // reset selection
-    //emit loadBegin(resetHome);
+    emit sigLoadBegin(resetHome);
 
     m_sceneCenter = osg::Vec3(0.0f,0.0f,0.0f);
 
-    m_rootShadowNodes->removeChild(m_pCurrentData.get());
+    m_ptrRootShadowNodes->removeChild(m_pCurrentData.get());
     m_pCurrentData = data;
 
     if (!data)
@@ -189,7 +189,7 @@ void xSceneModel::setData(osg::Node *data, bool resetHome)
 
     m_pCurrentData->setName("currentData");
 
-    m_rootShadowNodes->addChild(m_pCurrentData.get());
+    m_ptrRootShadowNodes->addChild(m_pCurrentData.get());
 
     // translate all the underlay layers to bottom
     //ExtentsVisitor ext;
@@ -204,8 +204,7 @@ void xSceneModel::setData(osg::Node *data, bool resetHome)
     }
 
 	setShadowEnabled(m_bShadowScene);
-	sigUpdateModel();
-    //emit loadFinished();
+    emit sigLoadFinished();
 }
 
 void xSceneModel::setShadowEnabled(bool val)
@@ -213,13 +212,13 @@ void xSceneModel::setShadowEnabled(bool val)
 	if (val)
 	{
 		int alg = 3;
-		const osg::BoundingSphere& bs = m_rootShadowNodes->getBound();
+		const osg::BoundingSphere& bs = m_ptrRootShadowNodes->getBound();
 		// test bidon pour modifier l'algo d'ombrage en fonction de la taille de l'objet
 		if (alg == 0)
 		{
 			osg::ref_ptr<osgShadow::ParallelSplitShadowMap> pssm = new osgShadow::ParallelSplitShadowMap(NULL,5);
 			pssm->setTextureResolution(2048);
-			m_rootShadowNodes->setShadowTechnique(pssm.get());
+			m_ptrRootShadowNodes->setShadowTechnique(pssm.get());
 
 			pssm->init();
 		}
@@ -230,7 +229,7 @@ void xSceneModel::setShadowEnabled(bool val)
 			pssm->setTextureSize(osg::Vec2s(2048,2048));
 
 			//pssm->setTextureResolution(2048);
-			m_rootShadowNodes->setShadowTechnique(pssm.get());
+			m_ptrRootShadowNodes->setShadowTechnique(pssm.get());
 
 			pssm->init();
 		}
@@ -240,13 +239,13 @@ void xSceneModel::setShadowEnabled(bool val)
 			pssm->setTextureSize(osg::Vec2s(2048,2048));
 
 			//pssm->setTextureResolution(2048);
-			m_rootShadowNodes->setShadowTechnique(pssm.get());
+			m_ptrRootShadowNodes->setShadowTechnique(pssm.get());
 
 			pssm->init();
 		}
 	}
 	else
 	{
-		m_rootShadowNodes->setShadowTechnique(NULL);
+		m_ptrRootShadowNodes->setShadowTechnique(NULL);
 	}
 }

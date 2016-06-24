@@ -17,54 +17,26 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *******************************************************************************/
+ 
+#ifndef _XFINDNAMELISTVISITOR_H_
+#define _XFINDNAMELISTVISITOR_H_
 
-#ifndef _XPROPERTYWIDGET_H_
-#define _XPROPERTYWIDGET_H_
-
-#include <QtCore/QString>
-#include <QtGui/QScrollArea>
-#include <QtCore/QMap>
-
+#include <osg/NodeVisitor>
 #include <osg/Node>
-#include <osg/Switch>
-#include <osg/LOD>
-#include <osg/Geode>
 
-#include "qttreepropertybrowser.h"
-#include "qtvariantproperty.h"
+#include <QtCore/QStringList>
 
-class xPropertyWidget : public QtTreePropertyBrowser
+class xFindNameListVisitor : public osg::NodeVisitor
 {
-    Q_OBJECT
-
 public:
+    xFindNameListVisitor();
 
-    xPropertyWidget(QWidget *parent = 0);
-    ~xPropertyWidget() {}
+    virtual void apply(osg::Node &searchNode);
 
-    void displayProperties(osg::Node *);
-    void displayNodeProperties(osg::Node *node);
-    void displayLODProperties(osg::LOD *);
-    void displaySwitchProperties(osg::Switch *);
-    void displayGeodeProperties(osg::Geode *node);
-    void displayBaseStats(osg::Node *);
-
-public slots:
-
-signals:
-
-protected:
+    const QStringList& getNameList() const { return m_nameList; }
 
 private:
-    void initDictionaries();
-
-    QString m_file;
-
-    QtVariantPropertyManager *m_pVariantManager;
-
-    QList<QString> m_listDataVariance;
-    QList<QString> m_listCenterMode;
-    QList<QString> m_listRangeMode;
+    QStringList m_nameList;
 };
 
-#endif // _PROPERTYWIDGET_H_
+#endif // _FINDNAMELISTVISITOR_H_

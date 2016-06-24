@@ -32,12 +32,12 @@ using namespace osgGA;
 
 xPickingHandler::xPickingHandler() :
     TrackballManipulator(),
-    m_viewer(NULL),
-    m_dummy(0),
-    m_recenter(false),
-    m_picking(false),
-    m_trackballHelper(false),
-    m_inverseMouseWheel(false)
+    m_pViewer(NULL),
+    m_nDummy(0),
+    m_bRecenter(false),
+    m_bPicking(false),
+    m_bTrackballHelper(false),
+    m_bInverseMouseWheel(false)
 {}
 
 xPickingHandler::~xPickingHandler()
@@ -67,11 +67,11 @@ void xPickingHandler::getUsage(osg::ApplicationUsage& usage) const
 bool xPickingHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& us)
 {
     bool handled = false;
-    m_viewer = dynamic_cast<osgViewer::View*>(&us);
-    if (!m_viewer)
+    m_pViewer = dynamic_cast<osgViewer::View*>(&us);
+    if (!m_pViewer)
         return false;
 
-    switch( ea.getEventType() )
+    switch(ea.getEventType())
     {
         case osgGA::GUIEventAdapter::PUSH:
         {
@@ -85,30 +85,30 @@ bool xPickingHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAd
             if (ea.getButtonMask()==osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON)
             {
                 pick(ea);
-                if (m_trackballHelper)
-                    emit rotateView();
+                if (m_bTrackballHelper)
+                    emit sigRotateView();
             }
-            else if (ea.getButtonMask()==osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON && m_trackballHelper)
-                emit dragView();
-            else if (ea.getButtonMask()==osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON && m_trackballHelper)
-                emit zoomViewIn();
+            else if (ea.getButtonMask()==osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON && m_bTrackballHelper)
+                emit sigDragView();
+            else if (ea.getButtonMask()==osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON && m_bTrackballHelper)
+                emit sigZoomViewIn();
             break;
         }
 
         case GUIEventAdapter::SCROLL:
         {
-            switch ( ea.getScrollingMotion() )
+            switch (ea.getScrollingMotion())
             {
                 case GUIEventAdapter::SCROLL_UP:
 
                     //handle scroll down;
-                    zoom(ZOOMIN,m_inverseMouseWheel);
+                    zoom(ZOOMIN,m_bInverseMouseWheel);
                     handled = true;
                     break;
                 case GUIEventAdapter::SCROLL_DOWN:
 
                     //handle scroll up
-                    zoom(ZOOMOUT,m_inverseMouseWheel);
+                    zoom(ZOOMOUT,m_bInverseMouseWheel);
                     handled = true;
                     break;
                 default:
@@ -122,12 +122,12 @@ bool xPickingHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAd
         {
             if (ea.getKey() == GUIEventAdapter::KEY_Shift_L || ea.getKey() == GUIEventAdapter::KEY_Shift_R)
             {
-                m_recenter = true;
+                m_bRecenter = true;
                 handled = true;
             }
             else if (ea.getKey() == GUIEventAdapter::KEY_Control_L || ea.getKey() == GUIEventAdapter::KEY_Control_R)
             {
-                m_picking = true;
+                m_bPicking = true;
                 handled = true;
             }
             else if (ea.getKey()== GUIEventAdapter::KEY_Space)
@@ -142,17 +142,17 @@ bool xPickingHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAd
 
         case (GUIEventAdapter::KEYUP):
         {
-            m_recenter = false;
-            m_picking = false;
+            m_bRecenter = false;
+            m_bPicking = false;
 			
             if (ea.getKey() == GUIEventAdapter::KEY_Shift_L || ea.getKey() == GUIEventAdapter::KEY_Shift_R)
             {
-                m_recenter = false;
+                m_bRecenter = false;
                 handled = true;
             }
             else if (ea.getKey() == GUIEventAdapter::KEY_Control_L || ea.getKey() == GUIEventAdapter::KEY_Control_R)
             {
-                m_picking = false;
+                m_bPicking = false;
                 handled = true;
             }
             break;
@@ -184,8 +184,8 @@ void xPickingHandler::zoom(int sens, int inverse)
         if (_distance > 1e+7)
             _distance = 1e+7;
 
-        if (m_trackballHelper)
-            emit zoomViewIn();
+        if (m_bTrackballHelper)
+            emit sigZoomViewIn();
     }
     else
     {
@@ -193,17 +193,17 @@ void xPickingHandler::zoom(int sens, int inverse)
         if (_distance < 0.05)
             _distance = 0.05;
 
-        if (m_trackballHelper)
-            emit zoomViewOut();
+        if (m_bTrackballHelper)
+            emit sigZoomViewOut();
     }
 }
 
 void xPickingHandler::pick(const osgGA::GUIEventAdapter& ea)
 {
-    if (!m_recenter && !m_picking)
+    if (!m_bRecenter && !m_bPicking)
         return;
 
-    osg::Node* scene = m_viewer->getSceneData();
+    osg::Node* scene = m_pViewer->getSceneData();
     if (!scene)
         return;
 
@@ -217,13 +217,13 @@ void xPickingHandler::pick(const osgGA::GUIEventAdapter& ea)
         double my = ea.getYnormalized();
         double w = 0.05;
         double h = 0.05;
-        osgUtil::PolytopeIntersector* picker = new osgUtil::PolytopeIntersector( osgUtil::Intersector::PROJECTION, mx - w, my - h, mx + w, my + h );
+        osgUtil::PolytopeIntersector* picker = new osgUtil::PolytopeIntersector(osgUtil::Intersector::PROJECTION, mx - w, my - h, mx + w, my + h);
 
         osgUtil::IntersectionVisitor iv(picker);
 
-        m_viewer->getCamera()->accept(iv);
+        m_pViewer->getCamera()->accept(iv);
 
-        if ( picker->containsIntersections() )
+        if (picker->containsIntersections())
         {
             osgUtil::PolytopeIntersector::Intersection intersection = picker->getFirstIntersection();
 
@@ -236,26 +236,26 @@ void xPickingHandler::pick(const osgGA::GUIEventAdapter& ea)
     {
         // use window coordinates
         // remap the mouse x,y into viewport coordinates.
-        osg::Viewport* viewport = m_viewer->getCamera()->getViewport();
-        float mx = viewport->x() + (int)( (float)viewport->width() * (ea.getXnormalized() * 0.5f + 0.5f) );
-        float my = viewport->y() + (int)( (float)viewport->height() * (ea.getYnormalized() * 0.5f + 0.5f) );
-        osgUtil::LineSegmentIntersector* picker = new osgUtil::LineSegmentIntersector( osgUtil::Intersector::WINDOW, mx, my );
+        osg::Viewport* viewport = m_pViewer->getCamera()->getViewport();
+        float mx = viewport->x() + (int)((float)viewport->width() * (ea.getXnormalized() * 0.5f + 0.5f));
+        float my = viewport->y() + (int)((float)viewport->height() * (ea.getYnormalized() * 0.5f + 0.5f));
+        osgUtil::LineSegmentIntersector* picker = new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, mx, my);
 
         osgUtil::IntersectionVisitor iv(picker);
 
-        m_viewer->getCamera()->accept(iv);
+        m_pViewer->getCamera()->accept(iv);
 
-        if ( picker->containsIntersections() )
+        if (picker->containsIntersections())
         {
             osgUtil::LineSegmentIntersector::Intersection intersection = picker->getFirstIntersection();
 
-            if (m_recenter)
+            if (m_bRecenter)
             {
                 osg::NodePath& nodePath = intersection.nodePath;
                 node = (nodePath.size()>=1) ? nodePath[nodePath.size() - 1] : 0;
 
                 // world matrix transform
-                osg::Matrix mat = matrixListtoSingle( node->getWorldMatrices() );
+                osg::Matrix mat = matrixListtoSingle(node->getWorldMatrices());
 
                 _center = intersection.localIntersectionPoint * mat;
 

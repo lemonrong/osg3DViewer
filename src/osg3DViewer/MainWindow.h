@@ -33,7 +33,9 @@ class xSceneModel;
 class xTreeModel;
 class xTreeView;
 class xPropertyWidget;
-
+class xObjectLoader;
+class QCompleter;
+class xSearchLineEdit;
 #include "ui_MainWindow.h"
 
 class MainWindow : public QMainWindow
@@ -61,14 +63,28 @@ public slots:
 	void on_actionHighLight_triggered(bool val);
 	void on_actionShadow_triggered(bool val);
 
+	void on_pushButtonClearLog_pressed();
+	void on_pushButtonSaveLog_pressed();
+
+	// search
+	void slotSearchCaseSensitiveToggled(bool checked);
+	void slotEditSearchReturnPressed();
+
 	void slotTreeNodeSelected(const QModelIndex &index);
 	void slotSelectTreeItem(osg::Drawable *);
+	void slotNewLoadedFile(osg::Node *);
 
+	void slotPrintToLog(const QString & mess);
+	void slotPrintToLog(const QStringList & mess);
+	void slotChangeAspectRatio(const QSize & sz);
+	
 protected slots:
     void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);
     void dropEvent(QDropEvent *event);
     void closeEvent(QCloseEvent *event);
+	bool eventFilter(QObject *obj, QEvent *event);
+	void keyPressEvent(QKeyEvent *event);
 
 signals:
     void sigNewFileToLoad(const QString &);
@@ -83,10 +99,12 @@ private:
 
 	void hideDockWidgets();
 	void showDockWidgets();
+	bool search(const QModelIndex &index,const QString &name);
+	void resetViews(bool allClear);
 
 private:
 	Ui::MainWindow ui;
-	osg::ref_ptr<osg::Node> m_rootNode;
+	osg::ref_ptr<osg::Node> m_ptrRootNode;
 	xSceneView *m_pSceneView;
 	xSceneModel *m_pSceneModel;
 
@@ -94,17 +112,29 @@ private:
 	xTreeModel *m_pTreeModel;
 	xTreeView *m_pTreeView;
 
+	QString m_appName;
+	QString m_version;
     // variables
 	QString m_currFile;
     QString m_lastDirectory;
 
     // recent files
-    QMenu *m_recentFilesMenu;
+    QMenu *m_pRecentFilesMenu;
     QStringList m_recentFiles;
 
-   
+	// for Lod factor manipulation
+	QLabel *m_pLODFactorLabel;
+	float m_fLODFactor;
+
+	xObjectLoader *m_pObjectLoader;
     // display aspect ratio of the central windows
-    QLabel *m_aspectRatioLabel;
+    QLabel *m_pAspectRatioLabel;
+
+	// for search function
+	bool m_bCaseSensitive;
+	QCompleter *m_pCompleterSearch;
+	QModelIndex m_currSearchIndex;
+	xSearchLineEdit *m_pLineEditSearch;
 
 	xPropertyWidget *m_pPropertyWidget;
 };

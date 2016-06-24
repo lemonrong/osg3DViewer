@@ -11,7 +11,7 @@
     <x>0</x>
     <y>0</y>
     <width>874</width>
-    <height>600</height>
+    <height>842</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -89,7 +89,7 @@
   </widget>
   <widget class="QDockWidget" name="dockWidget_Model">
    <property name="windowTitle">
-    <string>Model Structure</string>
+    <string>Structure</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -125,9 +125,77 @@
    <addaction name="actionHighLight"/>
    <addaction name="actionShadow"/>
   </widget>
+  <widget class="QDockWidget" name="logDock">
+   <property name="toolTip">
+    <string>Log</string>
+   </property>
+   <property name="statusTip">
+    <string>Log</string>
+   </property>
+   <property name="whatsThis">
+    <string>Log</string>
+   </property>
+   <property name="accessibleName">
+    <string>Log</string>
+   </property>
+   <property name="accessibleDescription">
+    <string>Log</string>
+   </property>
+   <property name="floating">
+    <bool>false</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Log</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <widget class="QPushButton" name="pushButtonClearLog">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../res/osg3DViewer.qrc">
+         <normaloff>:/osg3DViewer/delete.png</normaloff>:/osg3DViewer/delete.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>619</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="0" colspan="3">
+      <widget class="QTextBrowser" name="textBrowserLog"/>
+     </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="pushButtonSaveLog">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../res/osg3DViewer.qrc">
+         <normaloff>:/osg3DViewer/icon_save.png</normaloff>:/osg3DViewer/icon_save.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset>
+    <iconset resource="../res/osg3DViewer.qrc">
      <normaloff>:/osg3DViewer/open.png</normaloff>:/osg3DViewer/open.png</iconset>
    </property>
    <property name="text">
@@ -136,7 +204,7 @@
   </action>
   <action name="actionUnload">
    <property name="icon">
-    <iconset>
+    <iconset resource="../res/osg3DViewer.qrc">
      <normaloff>:/osg3DViewer/unload.png</normaloff>:/osg3DViewer/unload.png</iconset>
    </property>
    <property name="text">
@@ -145,7 +213,7 @@
   </action>
   <action name="actionSave_As">
    <property name="icon">
-    <iconset>
+    <iconset resource="../res/osg3DViewer.qrc">
      <normaloff>:/osg3DViewer/icon_save.png</normaloff>:/osg3DViewer/icon_save.png</iconset>
    </property>
    <property name="text">
@@ -154,7 +222,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset>
+    <iconset resource="../res/osg3DViewer.qrc">
      <normaloff>:/osg3DViewer/quit.png</normaloff>:/osg3DViewer/quit.png</iconset>
    </property>
    <property name="text">
@@ -163,7 +231,7 @@
   </action>
   <action name="actionReset_View">
    <property name="icon">
-    <iconset>
+    <iconset resource="../res/osg3DViewer.qrc">
      <normaloff>:/osg3DViewer/center.png</normaloff>:/osg3DViewer/center.png</iconset>
    </property>
    <property name="text">
@@ -175,7 +243,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../res/osg3DViewer.qrc">
      <normaloff>:/osg3DViewer/texture_on.png</normaloff>:/osg3DViewer/texture_on.png</iconset>
    </property>
    <property name="text">
@@ -187,7 +255,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../res/osg3DViewer.qrc">
      <normaloff>:/osg3DViewer/light_on.png</normaloff>:/osg3DViewer/light_on.png</iconset>
    </property>
    <property name="text">
@@ -199,7 +267,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../res/osg3DViewer.qrc">
      <normaloff>:/osg3DViewer/highlight_on.png</normaloff>:/osg3DViewer/highlight_on.png</iconset>
    </property>
    <property name="text">
@@ -211,7 +279,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../res/osg3DViewer.qrc">
      <normaloff>:/osg3DViewer/icon_shadow_on.png</normaloff>:/osg3DViewer/icon_shadow_on.png</iconset>
    </property>
    <property name="text">
@@ -223,7 +291,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../res/osg3DViewer.qrc">
      <normaloff>:/osg3DViewer/fullscreen.png</normaloff>:/osg3DViewer/fullscreen.png</iconset>
    </property>
    <property name="text">
@@ -243,6 +311,7 @@
  </widget>
  <resources>
   <include location="../res/osg3DViewer.qrc"/>
+  <include location="../../osGraphX-1.0.0/res/osgraphx.qrc"/>
  </resources>
  <connections/>
 </ui>

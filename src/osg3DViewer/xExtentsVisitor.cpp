@@ -32,7 +32,7 @@ void xExtentsVisitor::apply(osg::Geode &node)
     // update bounding box
     for (size_t i = 0; i < node.getNumDrawables(); ++i)
         // expand overall bounding box
-        bb.expandBy( node.getDrawable(i)->getBound() );
+        bb.expandBy(node.getDrawable(i)->getBound());
 
     osg::BoundingBox xbb;
 

@@ -41,7 +41,7 @@ namespace osgwTools
 /** Return true if the specified \c StateSet is empty, and false otherwise.
 */
 // 
-OSGWTOOLS_EXPORT bool isEmpty( const osg::StateSet& stateSet );
+OSGWTOOLS_EXPORT bool isEmpty(const osg::StateSet& stateSet);
 
 /** Return a \c StateSet that represents the accumulation of all \c StateSets
 in the specified \c NodePath.
@@ -51,7 +51,7 @@ calling code must take responsibility for handling reference counting
 (but storing the StateSet in a ref_ptr, for example).
 */
 //OSGWTOOLS_EXPORT 
-OSGWTOOLS_EXPORT osg::StateSet* accumulateStateSets( const osg::NodePath& nodePath );
+OSGWTOOLS_EXPORT osg::StateSet* accumulateStateSets(const osg::NodePath& nodePath);
 
 
 /*@}*/

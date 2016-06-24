@@ -18,53 +18,21 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *******************************************************************************/
 
-#ifndef _XPROPERTYWIDGET_H_
-#define _XPROPERTYWIDGET_H_
+#ifndef _XAPPETTINGS_H_
+#define _XAPPETTINGS_H_
 
-#include <QtCore/QString>
-#include <QtGui/QScrollArea>
-#include <QtCore/QMap>
+#include <QtCore/QSettings>
 
-#include <osg/Node>
-#include <osg/Switch>
-#include <osg/LOD>
-#include <osg/Geode>
+#define PACKAGE_ORGANIZATION "Lemon Rong"
+#define PACKAGE_NAME "osg3DViewer"
+#define PACKAGE_VERSION "1.0.0"
 
-#include "qttreepropertybrowser.h"
-#include "qtvariantproperty.h"
-
-class xPropertyWidget : public QtTreePropertyBrowser
+class xAppSettings : public QSettings
 {
     Q_OBJECT
 
 public:
-
-    xPropertyWidget(QWidget *parent = 0);
-    ~xPropertyWidget() {}
-
-    void displayProperties(osg::Node *);
-    void displayNodeProperties(osg::Node *node);
-    void displayLODProperties(osg::LOD *);
-    void displaySwitchProperties(osg::Switch *);
-    void displayGeodeProperties(osg::Geode *node);
-    void displayBaseStats(osg::Node *);
-
-public slots:
-
-signals:
-
-protected:
-
-private:
-    void initDictionaries();
-
-    QString m_file;
-
-    QtVariantPropertyManager *m_pVariantManager;
-
-    QList<QString> m_listDataVariance;
-    QList<QString> m_listCenterMode;
-    QList<QString> m_listRangeMode;
+    xAppSettings();
 };
 
-#endif // _PROPERTYWIDGET_H_
+#endif // _APPETTINGS_H_

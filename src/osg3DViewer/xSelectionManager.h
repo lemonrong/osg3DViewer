@@ -32,9 +32,7 @@ class xSelectionDecorator;
 
 class xSelectionManager
 {
-
 public:
-
     xSelectionManager();             //!< Constructor
     virtual ~xSelectionManager();    //!< Destructor
 
@@ -54,11 +52,9 @@ public:
     const xSelectionDecorator* getSelectionDecorator() const;            //!< Return the selection decorator.
 
 protected:
-
-    osg::ref_ptr<osg::Node> m_pSelectedNode;    //!< Selected node
-    osg::ref_ptr<osg::Geometry> m_pSelectedGeometry;    //!< Selected geometry
-
-    osg::ref_ptr<xSelectionDecorator> m_pSelectionDecorator;    //!< Decorator node for highlighting
+    osg::ref_ptr<osg::Node> m_ptrSelectedNode;    //!< Selected node
+    osg::ref_ptr<osg::Geometry> m_ptrSelectedGeometry;    //!< Selected geometry
+    osg::ref_ptr<xSelectionDecorator> m_ptrSelectionDecorator;    //!< Decorator node for highlighting
 };
 
 #endif // _OSG3DVIEWER_SELECTIONMANAGER_H

@@ -27,43 +27,43 @@ namespace osgwTools
 {
 
 
-bool isEmpty( const osg::StateSet& stateSet )
+bool isEmpty(const osg::StateSet& stateSet)
 {
-    bool empty( true );
-    if( stateSet.getDataVariance() != osg::Object::STATIC )
+    bool empty(true);
+    if(stateSet.getDataVariance() != osg::Object::STATIC)
         empty = false;
-    else if( !stateSet.getModeList().empty() )
+    else if(!stateSet.getModeList().empty())
         empty = false;
-    else if( !stateSet.getAttributeList().empty() )
+    else if(!stateSet.getAttributeList().empty())
         empty = false;
-    else if( !stateSet.getTextureModeList().empty() )
+    else if(!stateSet.getTextureModeList().empty())
         empty = false;
-    else if( !stateSet.getTextureAttributeList().empty() )
+    else if(!stateSet.getTextureAttributeList().empty())
         empty = false;
-    else if( !stateSet.getUniformList().empty() )
+    else if(!stateSet.getUniformList().empty())
         empty = false;
-    else if( stateSet.getRenderBinMode() != osg::StateSet::INHERIT_RENDERBIN_DETAILS )
+    else if(stateSet.getRenderBinMode() != osg::StateSet::INHERIT_RENDERBIN_DETAILS)
         empty = false;
-    else if( !stateSet.getNestRenderBins() )
+    else if(!stateSet.getNestRenderBins())
         empty = false;
 
-    return( empty );
+    return(empty);
 }
 
-osg::StateSet* accumulateStateSets( const osg::NodePath& nodePath )
+osg::StateSet* accumulateStateSets(const osg::NodePath& nodePath)
 {
     osg::ref_ptr< osg::StateSet > stateSet = new osg::StateSet();
 
     osg::NodePath::const_iterator it;
-    for( it = nodePath.begin(); it != nodePath.end(); ++it )
+    for(it = nodePath.begin(); it != nodePath.end(); ++it)
     {
         osg::Node* node = *it;
         osg::StateSet* nextStateSet = node->getStateSet();
-        if( nextStateSet != NULL )
-            stateSet->merge( *nextStateSet );
+        if(nextStateSet != NULL)
+            stateSet->merge(*nextStateSet);
     }
 
-    return( stateSet.release() );
+    return(stateSet.release());
 }
 
 

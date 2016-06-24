@@ -80,11 +80,10 @@ public:
     bool getLighting() const;           //!< Return lighting state for highlight rendering.
 
 protected:
-
-    osg::ref_ptr<osg::PolygonOffset> m_pPolyOffset; //!< PolygonOffset attribute for highlighting.
-    osg::ref_ptr<osg::PolygonMode> m_pPolyMode;     //!< PolygonMode attribute for highlighting.
-    osg::ref_ptr<osg::LineWidth> m_pLineWidth;      //!< LineWidth attribute for highlighting.
-    osg::ref_ptr<osg::Material> m_pMaterial;        //!< Material attribute for highlighting.
+    osg::ref_ptr<osg::PolygonOffset> m_ptrPolyOffset; //!< PolygonOffset attribute for highlighting.
+    osg::ref_ptr<osg::PolygonMode> m_ptrPolyMode;     //!< PolygonMode attribute for highlighting.
+    osg::ref_ptr<osg::LineWidth> m_ptrLineWidth;      //!< LineWidth attribute for highlighting.
+    osg::ref_ptr<osg::Material> m_ptrMaterial;        //!< Material attribute for highlighting.
 };
 
 #endif // _OSG3DVIEWER_SELECTIONDECORATOR_H_

@@ -46,28 +46,28 @@ to display an arbitrary GLenum mode as ASCII string (without a dependency on GLU
 class OSGWTOOLS_EXPORT CountsVisitor : public osg::NodeVisitor
 {
 public:
-    CountsVisitor( osg::NodeVisitor::TraversalMode mode = osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN );
+    CountsVisitor(osg::NodeVisitor::TraversalMode mode = osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN);
     ~CountsVisitor();
 
-    void setUserMode( GLenum userMode );
-    void setUserAttribute( osg::StateAttribute::Type userAttr );
+    void setUserMode(GLenum userMode);
+    void setUserAttribute(osg::StateAttribute::Type userAttr);
 
     void reset();
 
-    void dump( std::ostream& ostr=std::cout );
+    void dump(std::ostream& ostr=std::cout);
 
-    void apply( osg::Node& node );
-    void apply( osg::Group& node );
-    void apply( osg::LOD& node );
-    void apply( osg::PagedLOD& node );
-    void apply( osg::Switch& node );
-    void apply( osg::Sequence& node );
-    void apply( osg::Transform& node );
-    void apply( osg::MatrixTransform& node );
-    void apply( osg::Geode& node );
+    void apply(osg::Node& node);
+    void apply(osg::Group& node);
+    void apply(osg::LOD& node);
+    void apply(osg::PagedLOD& node);
+    void apply(osg::Switch& node);
+    void apply(osg::Sequence& node);
+    void apply(osg::Transform& node);
+    void apply(osg::MatrixTransform& node);
+    void apply(osg::Geode& node);
 
-    void apply( osg::Drawable* draw );
-    void apply( osg::StateSet* stateSet );
+    void apply(osg::Drawable* draw);
+    void apply(osg::StateSet* stateSet);
 
     unsigned int getVertices() const;
     unsigned int getDrawArrays() const;
@@ -76,11 +76,11 @@ public:
 
 //protected:
     std::deque< osg::ref_ptr< osg::StateSet > > _stateStack;
-    void pushStateSet( osg::StateSet* ss );
+    void pushStateSet(osg::StateSet* ss);
     void popStateSet();
 
-    bool isSet( GLenum stateItem, osg::StateSet* ss );
-    bool isEnabled( GLenum stateItem, osg::StateSet* ss );
+    bool isSet(GLenum stateItem, osg::StateSet* ss);
+    bool isEnabled(GLenum stateItem, osg::StateSet* ss);
 
     GLenum _userMode;
     bool _countUserMode;

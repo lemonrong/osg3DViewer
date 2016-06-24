@@ -60,21 +60,21 @@ xTreeModel::~xTreeModel()
 void xTreeModel::setNode(osg::Node *node)
 {
     reset();
-    m_node = node;
+    m_ptrNode = node;
 }
 
 //==============================================================================
 
 osg::Node* xTreeModel::getNode()
 {
-    return m_node.get();
+    return m_ptrNode.get();
 }
 
 //==============================================================================
 
 const osg::Node* xTreeModel::getNode() const
 {
-    return m_node.get();
+    return m_ptrNode.get();
 }
 
 //==============================================================================
@@ -85,7 +85,7 @@ QModelIndex xTreeModel::index(int row, int column, const QModelIndex &parent) co
 
     if (!parent.isValid())
     {
-        index = createIndex(row, column, m_node.get());
+        index = createIndex(row, column, m_ptrNode.get());
     }
     else
     {
@@ -108,7 +108,7 @@ QModelIndex xTreeModel::index(int row, int column, const QModelIndex &parent) co
 
 QModelIndex xTreeModel::parent(const QModelIndex &index) const
 {
-    if (!index.isValid() || getPrivateData(index) == m_node.get())
+    if (!index.isValid() || getPrivateData(index) == m_ptrNode.get())
         return QModelIndex();
 
     if (getPrivateData(index) == NULL)

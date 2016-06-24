@@ -55,7 +55,6 @@ public:
 	void setTextureEnabled(bool bTextureOn) {m_bTextrueScene = bTextureOn;}
 	bool getTextureEnabled() const {return m_bTextrueScene;}
 
-
     // get the root node of the scene
     osg::Node *getScene(void);
 
@@ -65,15 +64,10 @@ public:
     const osg::Vec3 & getSceneCenter() {return m_sceneCenter; }
 
 signals:
-	void sigUpdateModel();
-
-    //void loadBegin(bool);
-    //void loadFinished();
-
-public slots:
+	void sigLoadBegin(bool);
+	void sigLoadFinished();
 
 private:
-
     // functions
     void createScene();
 
@@ -83,6 +77,7 @@ private:
 
     void reoderUnderlays();
 
+private:
     // Type node (visible, ir3, ...)
     std::map<int, osg::Node *> m_mapTypeNodes;
 
@@ -118,7 +113,7 @@ private:
 
 	// root node of the model
 	//osg::ref_ptr<osg::Group> m_scene;
-	osg::ref_ptr<osgShadow::ShadowedScene> m_rootShadowNodes;
+	osg::ref_ptr<osgShadow::ShadowedScene> m_ptrRootShadowNodes;
 };
 
 #endif // _OSGVIEWER_XSCENEMODEL_H_

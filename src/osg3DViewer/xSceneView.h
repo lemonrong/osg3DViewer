@@ -60,9 +60,18 @@ public:
 	void resetSelection();
 
 	bool highlight(osg::Node* node);
+	bool centerOnNode(osg::Node* node);
+
+	void resizeEvent(QResizeEvent * event);
+
+	osgGA::TrackballManipulator *getTrackballManipulator(){return m_pPickHandler.get();}
 
 public slots:
 	void slotUpdateModel();
+
+	void slotResetHome();
+	void slotResetView(bool reset = true);
+	void slotPickGeometry(osg::Drawable *d);
 
 signals:
 	//void newScreenshotAvailable(osg::Image *);
@@ -75,8 +84,7 @@ protected:
 	virtual void paintEvent(QPaintEvent* /* event */)  {frame();}
 
 private:
-	//void createSceneEnvironnement();
-	
+	 osg::Matrix matrixListtoSingle(const osg::MatrixList &tmplist);
 
 private:
 	QTimer m_timer;
@@ -86,8 +94,13 @@ private:
 	osg::ref_ptr<osgGA::StateSetManipulator> m_pStatesetManipulator;
 	osg::ref_ptr<xPickingHandler>  m_pPickHandler;
 
+	bool m_bResetHome;
+	osg::Matrixd m_matrix;
+	osg::Vec3d m_vCenter;
+	double m_dDistance;
+
 	xSceneModel *m_pModel;
-	xSelectionManager *m_selectionManager;
+	xSelectionManager *m_pSelectionManager;
 };
 
 #endif 

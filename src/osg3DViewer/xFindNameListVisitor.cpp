@@ -17,37 +17,21 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  *******************************************************************************/
-#ifndef _XEXTENTS_VISITOR_H_
-#define _XEXTENTS_VISITOR_H_
-#include <osg/NodeVisitor>
-#include <osg/Geode>
-#include <osg/BoundingBox>
-#include <osg/Matrix>
-#include <osg/MatrixTransform>
+ 
+#include "xFindNameListVisitor.h"
 
-//========================================================================
-//  ExtentsVisitor.
-/// Visit all nodes and compute bounding box extents.
-//========================================================================
-
-class xExtentsVisitor : public osg::NodeVisitor
+xFindNameListVisitor::xFindNameListVisitor() :
+    osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
 {
-public:
+    // in order to visit all the nodeswith mask 0x0 !!
+    setTraversalMask(0xffffffff);
+    setNodeMaskOverride(0xffffffff);
+}
 
-    xExtentsVisitor() : NodeVisitor(NodeVisitor::TRAVERSE_ALL_CHILDREN) {}
-    virtual ~xExtentsVisitor() {}
+void xFindNameListVisitor::apply(osg::Node &searchNode)
+{
+    if (!searchNode.getName().empty())
+        m_nameList << searchNode.getName().c_str();
 
-    virtual void apply(osg::Geode &node);
-    virtual void apply(osg::Transform &node);  // override apply from NodeVisitor
-
-    ///
-    /// Return the bounding box of the nodes.
-    ///
-    const osg::BoundingBox &GetBound() const;
-
-protected:
-
-    osg::BoundingBox m_BoundingBox; // bound box
-    osg::Matrix m_TransformMatrix;  // current transform matrix
-};
-#endif
+    traverse(searchNode);
+}

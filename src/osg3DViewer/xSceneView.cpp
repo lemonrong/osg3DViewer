@@ -18,6 +18,7 @@
  *******************************************************************************/
 #include "xSceneModel.h"
 #include "xSceneView.h"
+#include "xExtentsVisitor.h"
 #include "xSelectionManager.h"
 #include "xShaderSelectionDecorator.h"
 #include <QtGui/QGridLayout>
@@ -36,7 +37,7 @@ const int castsShadowTraversalMask = 0x2;
 
 //------------------------------------------------------------------------------------------------------------
 
-xSceneView::xSceneView(QWidget *parent) : QWidget(parent), m_refreshPeriod(defaultRefreshPeriod), m_selectionManager(NULL)
+xSceneView::xSceneView(QWidget *parent) : QWidget(parent), m_refreshPeriod(defaultRefreshPeriod), m_pSelectionManager(NULL)
 {
 	setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
 	setKeyEventSetsDone(0);
@@ -108,29 +109,20 @@ void xSceneView::setModel(xSceneModel *model)
 {
 	m_pModel = model;
 	slotUpdateModel();
-
-	// clean previous elements
-	////for (int i = m_rootNodes->getNumChildren() - 1; i >= 0; i--)
-	////	m_rootNodes->removeChild(i);
-
 	
-	//connect(m_model, SIGNAL(loadBegin(bool)), this, SLOT(resetView(bool)));
-	//connect(m_model, SIGNAL(loadFinished()), this, SLOT(resetHome()));
+	connect(m_pModel, SIGNAL(sigLoadBegin(bool)), this, SLOT(slotResetView(bool)));
+	connect(m_pModel, SIGNAL(sigLoadFinished()), this, SLOT(slotResetHome()));
 
 	if (NULL != m_pPickHandler)
 	{
 		connect(m_pPickHandler.get(), SIGNAL(sigPicked(osg::Drawable*)),this, SIGNAL(sigPicked(osg::Drawable*)));
-		//connect(m_atm.get(), SIGNAL(recenterViewTo(double,double,double)),this, SLOT(recenterPivotPoint(double,double,double)));
+		//connect(m_pPickHandler.get(), SIGNAL(recenterViewTo(double,double,double)),this, SLOT(recenterPivotPoint(double,double,double)));
 
-		//connect(m_atm.get(), SIGNAL(zoomViewIn()),this, SLOT(showZoomIn()));
-		//connect(m_atm.get(), SIGNAL(zoomViewOut()),this, SLOT(showZoomOut()));
-		//connect(m_atm.get(), SIGNAL(dragView()),this, SLOT(showDrag()));
-		//connect(m_atm.get(), SIGNAL(rotateView()),this, SLOT(showPivot()));
+		//connect(m_pPickHandler.get(), SIGNAL(zoomViewIn()),this, SLOT(showZoomIn()));
+		//connect(m_pPickHandler.get(), SIGNAL(zoomViewOut()),this, SLOT(showZoomOut()));
+		//connect(m_pPickHandler.get(), SIGNAL(dragView()),this, SLOT(showDrag()));
+		//connect(m_pPickHandler.get(), SIGNAL(rotateView()),this, SLOT(showPivot()));
 	}
-	
-
-	//m_rootNodes->addChild(m_model->getScene());
-	
 }
 
 void xSceneView::setRefreshPeriod(unsigned int period)
@@ -146,7 +138,55 @@ void xSceneView::setIdle(bool val)
 		m_timer.start(defaultRefreshPeriod);
 }
 
+void xSceneView::slotResetView(bool reset)
+{
+	m_bResetHome = reset;
+	if (!m_bResetHome)
+	{
+		// get the previous values;
+		m_matrix = getTrackballManipulator()->getMatrix();
+		m_vCenter = getTrackballManipulator()->getCenter();
+		m_dDistance = getTrackballManipulator()->getDistance();
+	}
+}
 
+void xSceneView::slotResetHome()
+{
+	m_pView->getCameraManipulator()->setAutoComputeHomePosition(false);
+
+	osg::ref_ptr<osg::Node> ptrRootNode = m_pModel->getScene();
+	ptrRootNode->dirtyBound();
+
+	// save the current bbox;
+	xExtentsVisitor ext;
+	ptrRootNode->accept(ext);
+
+	osg::BoundingSphere bound = ptrRootNode->getBound();
+
+	m_pView->getCameraManipulator()->setHomePosition(bound.center() + osg::Vec3(1.5f * bound.radius(),-3.0f * bound.radius(),1.5f * bound.radius()),
+		bound.center(),
+		osg::Vec3(0.0f,0.0f,1.0f));
+
+	// compute the new scale of grid if enable
+	//if (m_showGrid)
+	//	setGridEnabled(true);
+
+	if (m_bResetHome)
+	{
+		home();
+	}
+	else
+	{
+		// restore the view point
+		getTrackballManipulator()->setDistance(m_dDistance);
+		getTrackballManipulator()->setByMatrix(m_matrix);
+		getTrackballManipulator()->setCenter(m_vCenter);
+	}
+}
+void xSceneView::slotPickGeometry(osg::Drawable *d)
+{
+	resetSelection();
+}
 void xSceneView::home()
 {
 	//osg::Vec3d eye;
@@ -202,20 +242,20 @@ bool xSceneView::getTextureEnabled() const
 }
 bool xSceneView::highlight(osg::Node* node)
 {
-	if (!m_selectionManager)
+	if (!m_pSelectionManager)
 	{
-		m_selectionManager = new xSelectionManager;
-		m_selectionManager->setSelectionDecorator(new xShaderSelectionDecorator);
+		m_pSelectionManager = new xSelectionManager;
+		m_pSelectionManager->setSelectionDecorator(new xShaderSelectionDecorator);
 	}
 
 	resetSelection();
-	m_selectionManager->select(node);
+	m_pSelectionManager->select(node);
 	return true;
 }
 void xSceneView::resetSelection()
 {
-	if (m_selectionManager)
-		m_selectionManager->clearSelection();
+	if (m_pSelectionManager)
+		m_pSelectionManager->clearSelection();
 }
 
 void xSceneView::slotUpdateModel()
@@ -239,4 +279,49 @@ void xSceneView::slotUpdateModel()
 			bound.center(),	osg::Vec3(0.0f,0.0f,1.0f));
 		m_pView->home();
 	}
+}
+bool xSceneView::centerOnNode(osg::Node* node)
+{
+	if (!node)
+		return false;
+
+	const osg::BoundingSphere& bs = node->getBound();
+	if (bs.radius() < 0.0) // invalid node
+		return false;
+
+	// world matrix transform
+	osg::Matrix mat = matrixListtoSingle(node->getWorldMatrices());
+	m_pPickHandler->setCenter(bs.center() * mat);
+	m_pPickHandler->setDistance(3.0 * bs.radius());
+
+	return true;
+}
+osg::Matrix xSceneView::matrixListtoSingle(const osg::MatrixList &tmplist)
+{
+	osg::Matrix tmp;
+
+	if (tmplist.size() > 0)
+	{
+		unsigned int i;
+		for (i = 1, tmp = tmplist[0]; i < tmplist.size(); i++)
+			tmp *= tmplist[0];
+		tmp = tmplist[0];
+	}
+	return (tmp);
+}
+void xSceneView::resizeEvent(QResizeEvent * event)
+{
+	//if (m_statsHandler)
+	//	m_statsHandler->setWindowSize(width(), height());
+
+	//if (m_cameraCompass)
+	//{
+	//	m_cameraCompass->setProjectionMatrix(osg::Matrix::ortho2D(0.0,width(),0.0,height()));
+	//	osg::MatrixTransform *mat = dynamic_cast<osg::MatrixTransform *>(m_cameraCompass->getChild(0));
+	//	mat->setMatrix(osg::Matrix::translate(width() - compassSize / 2.0f - compassOffset,compassSize / 2.0f + compassOffset,0.0f));
+	//}
+
+	// inform that aspect rastio has changed
+	emit sigNewAspectRatio(QSize(width(), height()));
+	QWidget::resizeEvent(event);
 }

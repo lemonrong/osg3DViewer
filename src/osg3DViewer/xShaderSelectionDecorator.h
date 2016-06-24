@@ -36,7 +36,6 @@
 class xShaderSelectionDecorator : public xSelectionDecorator
 {
 public:
-
     // Initialization
     xShaderSelectionDecorator();           //!< Constructor
     virtual ~xShaderSelectionDecorator();  //!< Destructor
@@ -46,7 +45,6 @@ public:
 protected:
 
 private:
-
     bool loadShader();
 
     osg::ref_ptr<osg::PolygonOffset> m_pPolyOffset; //!< PolygonOffset attribute for highlighting.

@@ -359,7 +359,7 @@ void QtSliderFactoryPrivate::slotSetValue(int value)
 {
     QObject *object = q_ptr->sender();
     const QMap<QSlider *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
-    for (QMap<QSlider *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor ) {
+    for (QMap<QSlider *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor) {
         if (itEditor.key() == object) {
             QtProperty *property = itEditor.value();
             QtIntPropertyManager *manager = q_ptr->propertyManager(property);

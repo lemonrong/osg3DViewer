@@ -30,8 +30,8 @@
 
 namespace osg
 {
-class Node;
-class Object;
+	class Node;
+	class Object;
 }
 
 //  Class Declaration
@@ -41,7 +41,6 @@ class xTreeModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-
     enum
     {
         COL_NAME = 0,
@@ -83,8 +82,7 @@ protected:
     inline osg::Node* getPrivateData(const QModelIndex &index) const { return reinterpret_cast<osg::Node*>(index.internalPointer()); }
 
 private:
-
-    osg::ref_ptr<osg::Node> m_node;
+    osg::ref_ptr<osg::Node> m_ptrNode;
     QHash<QString, QIcon> m_hashIcon;
 };
 
