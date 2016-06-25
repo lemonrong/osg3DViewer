@@ -41,7 +41,6 @@ class xSearchLineEdit;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -51,8 +50,8 @@ public:
 public slots:
     void on_actionQuit_triggered();
     void on_actionOpen_triggered();
-	void on_actionUnload_triggered();
-	void on_actionSave_As_triggered();
+    void on_actionUnload_triggered();
+    void on_actionSave_As_triggered();
     void recentFileActivated(QAction *action);
     void setupRecentFilesMenu();
 
@@ -62,6 +61,15 @@ public slots:
 	void on_actionLight_triggered(bool val);
 	void on_actionHighLight_triggered(bool val);
 	void on_actionShadow_triggered(bool val);
+	void on_actionOptimize_triggered(bool val);
+	void on_actionBackFace_triggered(bool val);
+	
+    void on_actionEnableNode_triggered();
+    void on_actionDisableNode_triggered();
+    void on_actionExpandTree_triggered();
+    void on_actionCollapseTree_triggered();
+    void on_actionCenterOnSelection_triggered();
+    void slotTreeViewCustomContextMenuRequested(const QPoint& pos);
 
 	void on_pushButtonClearLog_pressed();
 	void on_pushButtonSaveLog_pressed();
@@ -83,8 +91,8 @@ protected slots:
     void dragMoveEvent(QDragMoveEvent *event);
     void dropEvent(QDropEvent *event);
     void closeEvent(QCloseEvent *event);
-	bool eventFilter(QObject *obj, QEvent *event);
-	void keyPressEvent(QKeyEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event);
+    void keyPressEvent(QKeyEvent *event);
 
 signals:
     void sigNewFileToLoad(const QString &);
@@ -96,6 +104,9 @@ private:
     void updateUi();
     void enableActions(bool);
     void updateApplicationIdentity();
+    void expandReccursively(const QModelIndex &index);
+    void collapseReccursively(const QModelIndex &index);
+
 
 	void hideDockWidgets();
 	void showDockWidgets();
@@ -125,6 +136,8 @@ private:
 	// for Lod factor manipulation
 	QLabel *m_pLODFactorLabel;
 	float m_fLODFactor;
+	
+	bool m_bOptimize;
 
 	xObjectLoader *m_pObjectLoader;
     // display aspect ratio of the central windows
@@ -135,7 +148,7 @@ private:
 	QCompleter *m_pCompleterSearch;
 	QModelIndex m_currSearchIndex;
 	xSearchLineEdit *m_pLineEditSearch;
-
+	
 	xPropertyWidget *m_pPropertyWidget;
 };
 

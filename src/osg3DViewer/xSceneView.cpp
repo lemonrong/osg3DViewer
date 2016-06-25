@@ -240,6 +240,19 @@ bool xSceneView::getTextureEnabled() const
 		return m_pModel->getTextureEnabled();
 	return false;
 }
+void xSceneView::setBackfaceEnabled(bool bBackface)
+{
+    if (m_pStatesetManipulator.valid())
+        m_pStatesetManipulator->setBackfaceEnabled(bBackface);
+    if (m_pModel != NULL)
+        m_pModel->setBackfaceEnabled(bBackface);
+}
+bool xSceneView::getBackfaceEnabled() const
+{
+    if (m_pModel != NULL)
+        return m_pModel->getBackfaceEnabled();
+    return false;
+}
 bool xSceneView::highlight(osg::Node* node)
 {
 	if (!m_pSelectionManager)

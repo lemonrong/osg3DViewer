@@ -51,6 +51,9 @@ public:
 
 	void setTextureEnabled(bool bTextureOn);
 	bool getTextureEnabled() const;
+	
+    void setBackfaceEnabled(bool bBackface);
+    bool getBackfaceEnabled() const;
 
 	void setHighlightScene(bool val);
 

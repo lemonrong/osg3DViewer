@@ -54,6 +54,9 @@ public:
 
 	void setTextureEnabled(bool bTextureOn) {m_bTextrueScene = bTextureOn;}
 	bool getTextureEnabled() const {return m_bTextrueScene;}
+	
+    void setBackfaceEnabled(bool bBackface) {m_bBackface = bBackface;}
+    bool getBackfaceEnabled() const {return m_bBackface;}
 
     // get the root node of the scene
     osg::Node *getScene(void);
@@ -61,7 +64,7 @@ public:
     // get the terrain node if exist
     osg::Node *getObject(void);
 
-    const osg::Vec3 & getSceneCenter() {return m_sceneCenter; }
+    const osg::Vec3 & getSceneCenter() {return m_sceneCenter;}
 
 signals:
 	void sigLoadBegin(bool);
@@ -104,6 +107,7 @@ private:
 	bool m_bShadowScene;
 	bool m_bTextrueScene;
 	bool m_bLightScene;
+	bool m_bBackface;
 
     osg::Vec3 m_baseLightPosition;
 

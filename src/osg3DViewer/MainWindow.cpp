@@ -89,7 +89,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_pSceneModel(NULL),
     m_pLODFactorLabel(NULL),
     m_fLODFactor(1.0f),
-    //m_prefs(NULL),
+    m_bOptimize(false),
     m_pObjectLoader(NULL),
     m_pAspectRatioLabel(NULL),
     m_bCaseSensitive(false),
@@ -145,6 +145,7 @@ void MainWindow::updateUi()
 	m_pTreeView->setModel(m_pTreeModel);
 	m_pSceneView->installEventFilter(this);
 	connect(m_pTreeView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotTreeNodeSelected(const QModelIndex &)), Qt::UniqueConnection);
+	connect(m_pTreeView, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotTreeViewCustomContextMenuRequested(const QPoint &)), Qt::UniqueConnection);
 	//QVBoxLayout *pTreeWidgetLayout = new QVBoxLayout(this);
 	
 	QWidget *pStructureWidget = new QWidget(ui.dockWidget_Model);
@@ -352,7 +353,8 @@ void MainWindow::enableActions(bool val)
     ui.actionTexture->setEnabled(val);
     ui.actionLight->setEnabled(val);
     ui.actionHighLight->setEnabled(val);
-    //ui->actionBackFace->setEnabled(val);
+    ui.actionBackFace->setEnabled(val);
+    ui.actionOptimize->setEnabled(val);
     //ui->actionIncreaseLOD->setEnabled(val);
     //ui->actionDecreaseLOD->setEnabled(val);
     //ui->actionResetLOD->setEnabled(val);
@@ -623,6 +625,121 @@ void MainWindow::on_pushButtonSaveLog_pressed()
 	out << ui.textBrowserLog->document()->toPlainText();
 	file.close();
 }
+void MainWindow::on_actionBackFace_triggered(bool val)
+{
+    m_pSceneView->setBackfaceEnabled(!val);
+}
+void MainWindow::on_actionOptimize_triggered(bool val)
+{
+    m_bOptimize = val;
+    if (m_pObjectLoader != NULL)
+    {
+        m_pObjectLoader->slotSetOptimization(m_bOptimize);
+    }
+}
+
+void MainWindow::on_actionEnableNode_triggered()
+{
+    //qDebug("on_actionEnableNode_activated");
+    QModelIndex index = m_pTreeView->currentIndex();
+
+    if ( !index.isValid() )
+        return;
+
+    m_pTreeModel->setEnableIndex(index,true);
+    m_pTreeView->update();
+}
+
+void MainWindow::on_actionDisableNode_triggered()
+{
+    QModelIndex index = m_pTreeView->currentIndex();
+
+    if ( !index.isValid() )
+        return;
+
+    m_pTreeModel->setEnableIndex(index,false);
+    m_pTreeView->update();
+}
+
+void MainWindow::on_actionExpandTree_triggered()
+{
+    QModelIndex index = m_pTreeView->currentIndex();
+
+    if ( !index.isValid() )
+        return;
+
+    expandReccursively(index);
+    m_pTreeView->resizeColumnToContents(0);
+}
+
+void MainWindow::on_actionCollapseTree_triggered()
+{
+    QModelIndex index = m_pTreeView->currentIndex();
+
+    if ( !index.isValid() )
+        return;
+
+    collapseReccursively(index);
+}
+
+void MainWindow::expandReccursively(const QModelIndex &index)
+{
+    if ( !index.isValid() )
+        return;
+
+    for (int i = 0; i < m_pTreeModel->rowCount(index); i++)
+    {
+        QModelIndex ind = index.child(i,0);
+        expandReccursively(ind);
+    }
+
+    m_pTreeView->expand(index);
+}
+
+void MainWindow::collapseReccursively(const QModelIndex &index)
+{
+    if ( !index.isValid() )
+        return;
+
+    m_pTreeView->collapse(index);
+
+    for (int i = 0; i < m_pTreeModel->rowCount(index); i++)
+    {
+        QModelIndex ind = index.child(i,0);
+        collapseReccursively(ind);
+    }
+}
+void MainWindow::on_actionCenterOnSelection_triggered()
+{
+    QModelIndex index = m_pTreeView->currentIndex();
+
+    if ( !index.isValid() )
+        return;
+
+    m_pSceneView->centerOnNode( reinterpret_cast<osg::Node*>( index.internalPointer() ) );
+
+    // TODO !!!!
+}
+
+void MainWindow::slotTreeViewCustomContextMenuRequested(const QPoint & pos)
+{
+    QModelIndex index = m_pTreeView->indexAt(pos);
+
+    if ( !index.isValid() )
+        return;
+
+    QMenu menu(this);
+
+    menu.addAction(ui.actionEnableNode);
+    menu.addAction(ui.actionDisableNode);
+    menu.addAction(ui.actionCenterOnSelection);
+    menu.insertSeparator(0);
+    menu.addAction(ui.actionExpandTree);
+    menu.addAction(ui.actionCollapseTree);
+
+    menu.exec( m_pTreeView->viewport()->mapToGlobal(pos) );
+}
+
 void MainWindow::showDockWidgets()
 {
 	QMainWindow::menuBar()->show();

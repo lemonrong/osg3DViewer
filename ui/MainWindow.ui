@@ -27,7 +27,7 @@
      <x>0</x>
      <y>0</y>
      <width>874</width>
-     <height>23</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -58,6 +58,8 @@
     <addaction name="actionLight"/>
     <addaction name="actionHighLight"/>
     <addaction name="actionShadow"/>
+    <addaction name="actionBackFace"/>
+    <addaction name="actionOptimize"/>
    </widget>
    <widget class="QMenu" name="menuShader">
     <property name="title">
@@ -308,10 +310,91 @@
     <string>Remove Shader</string>
    </property>
   </action>
+  <action name="actionBackFace">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../res/osg3DViewer.qrc">
+     <normaloff>:/osg3DViewer/backface_off.png</normaloff>
+     <normalon>:/osg3DViewer/backface_on.png</normalon>:/osg3DViewer/backface_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>Back Face</string>
+   </property>
+  </action>
+  <action name="actionOptimize">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../res/osg3DViewer.qrc">
+     <normaloff>:/osg3DViewer/potion.png</normaloff>:/osg3DViewer/potion.png</iconset>
+   </property>
+   <property name="text">
+    <string>Optimize</string>
+   </property>
+  </action>
+  <action name="actionEnableNode">
+   <property name="icon">
+    <iconset resource="../res/osg3DViewer.qrc">
+     <normaloff>:/osg3DViewer/treeview/tree_enable.png</normaloff>:/osg3DViewer/treeview/tree_enable.png</iconset>
+   </property>
+   <property name="text">
+    <string>Enable Node</string>
+   </property>
+  </action>
+  <action name="actionDisableNode">
+   <property name="icon">
+    <iconset resource="../res/osg3DViewer.qrc">
+     <normaloff>:/osg3DViewer/treeview/tree_disable.png</normaloff>:/osg3DViewer/treeview/tree_disable.png</iconset>
+   </property>
+   <property name="text">
+    <string>Disable Node</string>
+   </property>
+  </action>
+  <action name="actionExpandTree">
+   <property name="icon">
+    <iconset resource="../res/osg3DViewer.qrc">
+     <normaloff>:/osg3DViewer/expand.png</normaloff>:/osg3DViewer/expand.png</iconset>
+   </property>
+   <property name="text">
+    <string>Expand Tree</string>
+   </property>
+  </action>
+  <action name="actionCollapseTree">
+   <property name="icon">
+    <iconset resource="../res/osg3DViewer.qrc">
+     <normaloff>:/osg3DViewer/collapse.png</normaloff>:/osg3DViewer/collapse.png</iconset>
+   </property>
+   <property name="text">
+    <string>Collapse Tree</string>
+   </property>
+  </action>
+  <action name="actionCenterOnNode">
+   <property name="icon">
+    <iconset resource="../res/osg3DViewer.qrc">
+     <normaloff>:/osg3DViewer/center_on_selection.png</normaloff>:/osg3DViewer/center_on_selection.png</iconset>
+   </property>
+   <property name="text">
+    <string>Center on node</string>
+   </property>
+  </action>
+  <action name="actionCenterOnSelection">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../res/osg3DViewer.qrc">
+     <normaloff>:/osg3DViewer/center_on_selection.png</normaloff>:/osg3DViewer/center_on_selection.png</iconset>
+   </property>
+   <property name="text">
+    <string>Center on selection</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../res/osg3DViewer.qrc"/>
-  <include location="../../osGraphX-1.0.0/res/osgraphx.qrc"/>
  </resources>
  <connections/>
 </ui>
