@@ -22,7 +22,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 xTreeView::xTreeView(QWidget *parent/* = NULL*/) : QTreeView(parent)
 {
-
+    setContextMenuPolicy(Qt::CustomContextMenu);
 }
 xTreeView::~xTreeView()
 {

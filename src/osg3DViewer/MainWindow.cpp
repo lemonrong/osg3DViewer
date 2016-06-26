@@ -215,7 +215,14 @@ void MainWindow::on_actionSave_As_triggered()
 	m_pSceneModel->saveSceneData(fileName.toStdString());
 	//osgDB::writeNodeFile(*m_rootNode.get(), fileName.toStdString());
 }
+void MainWindow::on_actionLoad_Shader_triggered()
+{
 
+}
+void MainWindow::on_actionRemove_Shader_triggered()
+{
+
+}
 bool MainWindow::loadFile(const QString &file)
 {
 	if (file.isEmpty() || !QFileInfo(file).exists())

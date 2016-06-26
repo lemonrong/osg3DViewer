@@ -131,7 +131,6 @@ void xSceneModel::createScene()
     m_pSwitchRoot->setName("rootSwitch");
 
     m_pSwitchRoot->addChild(createSceneLight());
-
     // create and attach the scene nodes
     m_pTransformSpinScene = new osg::MatrixTransform; // spin transform for global scene
     m_pTransformSpinScene->setName("spinTransformScene");
@@ -146,7 +145,6 @@ void xSceneModel::createScene()
 	m_ptrRootShadowNodes->setReceivesShadowTraversalMask(receivesShadowTraversalMask);
 	m_ptrRootShadowNodes->setCastsShadowTraversalMask(castsShadowTraversalMask);
 	m_ptrRootShadowNodes->setDataVariance(osg::Object::DYNAMIC);
-
 	m_pNodeScene->addChild(m_ptrRootShadowNodes.get());
 
 	m_pCurrentData = new osg::Node();

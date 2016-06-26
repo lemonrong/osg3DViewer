@@ -64,6 +64,9 @@ public slots:
 	void on_actionOptimize_triggered(bool val);
 	void on_actionBackFace_triggered(bool val);
 	
+	void on_actionLoad_Shader_triggered();
+	void on_actionRemove_Shader_triggered();
+	
     void on_actionEnableNode_triggered();
     void on_actionDisableNode_triggered();
     void on_actionExpandTree_triggered();
