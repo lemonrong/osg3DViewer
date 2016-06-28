@@ -55,10 +55,10 @@ private:
     void init(bool enableCaseSensitive, bool enableWholeWords);
     QMenu* createOptionMenu(bool enableCaseSensitive, bool enableWholeWords);
 
-    QToolButton* m_pSearchButton;
-    QMenu* m_pOptionMenu;
-    QAction* m_pCaseSensitive;
-    QAction* m_pWholeWords;
+    QToolButton* m_searchButton;
+    QMenu* m_optionMenu;
+    QAction* m_caseSensitiveAction;
+    QAction* m_wholeWordsAction;
     QString m_inactiveText;
 };
 

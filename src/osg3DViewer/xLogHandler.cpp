@@ -34,44 +34,44 @@ const QString logHeaderInformation("GraphX Log");
 
 const int sendMessageInterval = 500; // 500 ms
 
-xLogHandler* xLogHandler::m_pInstance = 0;
+xLogHandler* xLogHandler::m_instance = 0;
 
 xLogHandler *xLogHandler::getInstance()
 {
     static QMutex mutex;
 
-    if (!m_pInstance)
+    if (!m_instance)
     {
         mutex.lock();
 
-        if (!m_pInstance)
-            m_pInstance = new xLogHandler;
+        if (!m_instance)
+            m_instance = new xLogHandler;
 
         mutex.unlock();
     }
 
-    return m_pInstance;
+    return m_instance;
 }
 
 xLogHandler::~xLogHandler()
 {
     static QMutex mutex;
     mutex.lock();
-    m_pInstance = 0;
+    m_instance = 0;
     mutex.unlock();
 }
 
 xLogHandler::xLogHandler() :
     m_currLevel(LOG_DEBUG),
-    m_bBufferized(true),
-    m_bStartEmission(false),
-    m_pTimer(NULL),
-    m_bSaveToLog(false)
+    m_isBufferized(true),
+    m_isStartEmission(false),
+    m_timer(NULL),
+    m_isSaveToLog(false)
 {
     loadSettings();
-    m_pTimer = new QTimer(this);
-    m_pTimer->setInterval(sendMessageInterval);
-    connect(m_pTimer,SIGNAL(timeout()),this,SLOT(slotUnqueueWaitingMessages()));
+    m_timer = new QTimer(this);
+    m_timer->setInterval(sendMessageInterval);
+    connect(m_timer,SIGNAL(timeout()),this,SLOT(slotUnqueueWaitingMessages()));
 }
 
 void xLogHandler::reportMessage(LogLevel level, const QString &message)
@@ -81,7 +81,7 @@ void xLogHandler::reportMessage(LogLevel level, const QString &message)
         return;
 
     /* Firstly send message to file log */
-    if (m_bSaveToLog)
+    if (m_isSaveToLog)
         fillAppLogFile(message);
 
     QString msgText(message);
@@ -121,7 +121,7 @@ void xLogHandler::reportMessage(LogLevel level, const QString &message)
         }
     }
 
-    if (m_bBufferized || !m_bStartEmission)
+    if (m_isBufferized || !m_isStartEmission)
         m_buffer << msg;
     else
         emit sigNewMessage(msg);
@@ -153,31 +153,31 @@ void xLogHandler::slotReportError(const QString &message)
 
 void xLogHandler::setBufferization(bool val)
 {
-    m_bBufferized = val;
-    if (!m_bBufferized) // send all stored messages
+    m_isBufferized = val;
+    if (!m_isBufferized) // send all stored messages
     {
-        m_pTimer->stop();
+        m_timer->stop();
         slotUnqueueWaitingMessages();
     }
     else
     {
-        m_pTimer->start();
+        m_timer->start();
     }
 }
 
 void xLogHandler::startEmission(bool val)
 {
-    m_bStartEmission = val;
-    if (m_bStartEmission && m_bBufferized)
-        m_pTimer->start();
+    m_isStartEmission = val;
+    if (m_isStartEmission && m_isBufferized)
+        m_timer->start();
     else
-        m_pTimer->stop();
+        m_timer->stop();
 }
 
 void xLogHandler::slotUnqueueWaitingMessages()
 {
     QMutexLocker locker(&m_lock);
-    if (m_bStartEmission)
+    if (m_isStartEmission)
     {
         if (!m_buffer.isEmpty())
         {
@@ -206,36 +206,36 @@ void xLogHandler::setLogDirectory(const QString &path)
         return;
 
     m_logDirectory = path;
-    if (m_bSaveToLog && m_pLogFile)
+    if (m_isSaveToLog && m_logFile)
     {
-        m_pLogFile->close();
-        delete m_pLogStream;
-        m_pLogStream = NULL;
-        delete m_pLogFile;
-        m_pLogFile = NULL;
+        m_logFile->close();
+        delete m_logStream;
+        m_logStream = NULL;
+        delete m_logFile;
+        m_logFile = NULL;
     }
 }
 
 void xLogHandler::setLogToFile(bool val)
 {
-    if (m_bSaveToLog == val)
+    if (m_isSaveToLog == val)
         return;
 
-    m_bSaveToLog = val;
-    if (!m_bSaveToLog && m_pLogFile)
+    m_isSaveToLog = val;
+    if (!m_isSaveToLog && m_logFile)
     {
-        m_pLogFile->close();
-        delete m_pLogStream;
-        m_pLogStream = NULL;
-        delete m_pLogFile;
-        m_pLogFile = NULL;
+        m_logFile->close();
+        delete m_logStream;
+        m_logStream = NULL;
+        delete m_logFile;
+        m_logFile = NULL;
     }
 }
 
 bool xLogHandler::fillAppLogFile(const QString &message)
 {
     /* Assure one access on the file by a mutex */
-    if(!m_pLogStream)
+    if(!m_logStream)
     {
         /* Product a log error */
         QString cdate = QDate::currentDate().toString("dd-MM-yyyy");
@@ -248,19 +248,19 @@ bool xLogHandler::fillAppLogFile(const QString &message)
 
         QString logName = QString("%1/%2.log").arg(m_logDirectory).arg(PACKAGE_NAME);
 
-        m_pLogFile = new QFile(logName);
+        m_logFile = new QFile(logName);
 
         // check the size of the file if exists => limit the log file to 10MBytes
-        if (m_pLogFile->size() > 10 * 1024 * 1024)
-            m_pLogFile->remove();
+        if (m_logFile->size() > 10 * 1024 * 1024)
+            m_logFile->remove();
 
-        if (m_pLogFile->open(QFile::WriteOnly | QFile::Append))
+        if (m_logFile->open(QFile::WriteOnly | QFile::Append))
         {
-            m_pLogStream = new QTextStream(m_pLogFile);
+            m_logStream = new QTextStream(m_logFile);
 
-            *m_pLogStream << "-----------------------------------------------------" << "\n";
-            *m_pLogStream << logHeaderInformation << QString(" by %1. Begin session at (%2 - %3) \n").arg(username).arg(cdate).arg(ctime);
-            *m_pLogStream << "-----------------------------------------------------" << "\n\n";
+            *m_logStream << "-----------------------------------------------------" << "\n";
+            *m_logStream << logHeaderInformation << QString(" by %1. Begin session at (%2 - %3) \n").arg(username).arg(cdate).arg(ctime);
+            *m_logStream << "-----------------------------------------------------" << "\n\n";
         }
         else
         {
@@ -268,9 +268,9 @@ bool xLogHandler::fillAppLogFile(const QString &message)
         }
     }
 
-    if(m_pLogStream)
+    if(m_logStream)
     {
-        *m_pLogStream << message << "\n";
+        *m_logStream << message << "\n";
         return true;
     }
 

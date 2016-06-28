@@ -67,7 +67,7 @@ public:
 
 	void resizeEvent(QResizeEvent * event);
 
-	osgGA::TrackballManipulator *getTrackballManipulator(){return m_pPickHandler.get();}
+	osgGA::TrackballManipulator *getTrackballManipulator(){return m_pickHandler.get();}
 
 public slots:
 	void slotUpdateModel();
@@ -90,20 +90,20 @@ private:
 	 osg::Matrix matrixListtoSingle(const osg::MatrixList &tmplist);
 
 private:
-	QTimer m_timer;
+	QTimer *m_timer;
 	unsigned int m_refreshPeriod;
-	osg::ref_ptr<osg::Camera> m_pCamera;
-	osg::ref_ptr<osgViewer::View> m_pView;
-	osg::ref_ptr<osgGA::StateSetManipulator> m_pStatesetManipulator;
-	osg::ref_ptr<xPickingHandler>  m_pPickHandler;
+	osg::ref_ptr<osg::Camera> m_camera;
+	osg::ref_ptr<osgViewer::View> m_view;
+	osg::ref_ptr<osgGA::StateSetManipulator> m_statesetManipulator;
+	osg::ref_ptr<xPickingHandler>  m_pickHandler;
 
-	bool m_bResetHome;
+	bool m_isResetHome;
 	osg::Matrixd m_matrix;
-	osg::Vec3d m_vCenter;
-	double m_dDistance;
+	osg::Vec3d m_center;
+	double m_distance;
 
-	xSceneModel *m_pModel;
-	xSelectionManager *m_pSelectionManager;
+	xSceneModel *m_model;
+	xSelectionManager *m_selectionManager;
 };
 
 #endif 

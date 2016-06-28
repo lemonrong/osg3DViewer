@@ -88,10 +88,10 @@ xShaderSelectionDecorator::xShaderSelectionDecorator() : xSelectionDecorator()
 {
     // create highlighting state
     m_pStateSet = getOrCreateStateSet();
-    m_pPolyOffset = new osg::PolygonOffset;
-    m_pPolyOffset->setFactor(-1.0f);
-    m_pPolyOffset->setUnits(-1.0f);
-    m_pStateSet->setAttributeAndModes(m_pPolyOffset.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+    m_polygonOffset = new osg::PolygonOffset;
+    m_polygonOffset->setFactor(-1.0f);
+    m_polygonOffset->setUnits(-1.0f);
+    m_pStateSet->setAttributeAndModes(m_polygonOffset.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
 
     setEnable(true);
 

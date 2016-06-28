@@ -49,14 +49,14 @@ public:
 	void setShadowEnabled(bool val);
     void setHighlightScene(bool val);
 
-	void setLightingEnabled(bool bLightingOn) {m_bLightScene=bLightingOn;}
-	bool getLightingEnabled() const {return m_bLightScene;}
+	void setLightingEnabled(bool bLightingOn) {m_isLightScene=bLightingOn;}
+	bool getLightingEnabled() const {return m_isLightScene;}
 
-	void setTextureEnabled(bool bTextureOn) {m_bTextrueScene = bTextureOn;}
-	bool getTextureEnabled() const {return m_bTextrueScene;}
+	void setTextureEnabled(bool bTextureOn) {m_isTextrueScene = bTextureOn;}
+	bool getTextureEnabled() const {return m_isTextrueScene;}
 	
-    void setBackfaceEnabled(bool bBackface) {m_bBackface = bBackface;}
-    bool getBackfaceEnabled() const {return m_bBackface;}
+    void setBackfaceEnabled(bool bBackface) {m_isBackface = bBackface;}
+    bool getBackfaceEnabled() const {return m_isBackface;}
 
     // get the root node of the scene
     osg::Node *getScene(void);
@@ -92,32 +92,32 @@ private:
     bool m_hideObjectNodes;
     std::map<int, bool> m_mapHideTypeNodes;
 
-	osg::ref_ptr<osg::Switch> m_pSwitchRoot;
+	osg::ref_ptr<osg::Switch> m_switchRoot;
 
-    osg::ref_ptr<osg::Group> m_pNodeScene;
+    osg::ref_ptr<osg::Group> m_sceneNode;
 
-    osg::ref_ptr<osg::MatrixTransform> m_pTransformSpinScene;
+    osg::ref_ptr<osg::MatrixTransform> m_transformSpinScene;
     //osg::MatrixTransform* m_transformSpinObject;
 
-    osg::ref_ptr<osg::Node> m_pCurrentData;
+    osg::ref_ptr<osg::Node> m_currentData;
 
-    osg::LightSource *m_pDefautLightSource;
+    osg::LightSource *m_defautLightSource;
 
-    bool m_bHighlightScene;
-	bool m_bShadowScene;
-	bool m_bTextrueScene;
-	bool m_bLightScene;
-	bool m_bBackface;
+    bool m_isHighlightScene;
+	bool m_isShadowScene;
+	bool m_isTextrueScene;
+	bool m_isLightScene;
+	bool m_isBackface;
 
     osg::Vec3 m_baseLightPosition;
 
-    osg::ref_ptr<osgFX::Scribe> m_pCurrentHightlight;
+    osg::ref_ptr<osgFX::Scribe> m_currentHightlight;
 
     osg::Vec3 m_sceneCenter;
 
 	// root node of the model
 	//osg::ref_ptr<osg::Group> m_scene;
-	osg::ref_ptr<osgShadow::ShadowedScene> m_ptrRootShadowNodes;
+	osg::ref_ptr<osgShadow::ShadowedScene> m_rootShadowNode;
 };
 
 #endif // _OSGVIEWER_XSCENEMODEL_H_

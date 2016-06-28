@@ -50,8 +50,8 @@ public:
 
     void pick(const osgGA::GUIEventAdapter& ea);
 
-    void setEnabledTrackballHelper(bool val) {m_bTrackballHelper = val; }
-    void setEnabledInverseMouseWheel(bool val) {m_bInverseMouseWheel = val; }
+    void setEnabledTrackballHelper(bool val) {m_isTrackballHelper = val; }
+    void setEnabledInverseMouseWheel(bool val) {m_isInverseMouseWheel = val; }
 
 signals:
     void sigPicked(osg::Drawable *);
@@ -69,13 +69,13 @@ protected:
     void zoom(int sens, int inverse);
 
     //viewer of the scene
-    osgViewer::View* m_pViewer;
+    osgViewer::View* m_viewer;
 
-    int m_nDummy;
-    bool m_bRecenter;
-    bool m_bPicking;
-    bool m_bTrackballHelper;
-    bool m_bInverseMouseWheel;
+    int m_dummy;
+    bool m_isRecenter;
+    bool m_isPicking;
+    bool m_isTrackballHelper;
+    bool m_isInverseMouseWheel;
 };
 
 #endif // _PICKINGHANDLER_H_

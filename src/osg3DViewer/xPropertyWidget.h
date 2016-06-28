@@ -60,11 +60,11 @@ private:
 
     QString m_file;
 
-    QtVariantPropertyManager *m_pVariantManager;
+    QtVariantPropertyManager *m_variantManager;
 
-    QList<QString> m_listDataVariance;
-    QList<QString> m_listCenterMode;
-    QList<QString> m_listRangeMode;
+    QList<QString> m_dataVariances;
+    QList<QString> m_centerModes;
+    QList<QString> m_rangeModes;
 };
 
 #endif // _PROPERTYWIDGET_H_

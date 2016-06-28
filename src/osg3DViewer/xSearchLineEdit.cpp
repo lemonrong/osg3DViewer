@@ -27,50 +27,50 @@
 
 xSearchLineEdit::xSearchLineEdit(QWidget* parent)
     : QLineEdit(parent)
-    , m_pSearchButton(new QToolButton(this))
-    , m_pOptionMenu(0)
-    , m_pCaseSensitive(0)
-    , m_pWholeWords(0)
+    , m_searchButton(new QToolButton(this))
+    , m_optionMenu(0)
+    , m_caseSensitiveAction(0)
+    , m_wholeWordsAction(0)
 {
     init(false, false);
 }
 
 xSearchLineEdit::xSearchLineEdit(bool enableCaseSensitive, bool enableWholeWords, QWidget* parent)
     : QLineEdit(parent)
-    , m_pSearchButton(new QToolButton(this))
-    , m_pOptionMenu(0)
-    , m_pCaseSensitive(0)
-    , m_pWholeWords(0)
+    , m_searchButton(new QToolButton(this))
+    , m_optionMenu(0)
+    , m_caseSensitiveAction(0)
+    , m_wholeWordsAction(0)
 {
     init(enableCaseSensitive, enableWholeWords);
 }
 
 xSearchLineEdit::~xSearchLineEdit()
 {
-    delete m_pCaseSensitive;
-    delete m_pWholeWords;
-    delete m_pOptionMenu;
-    delete m_pSearchButton;
+    delete m_caseSensitiveAction;
+    delete m_wholeWordsAction;
+    delete m_optionMenu;
+    delete m_searchButton;
 }
 
 void xSearchLineEdit::init(bool enableCaseSensitive, bool enableWholeWords)
 {
-    m_pOptionMenu = createOptionMenu(enableCaseSensitive, enableWholeWords);
+    m_optionMenu = createOptionMenu(enableCaseSensitive, enableWholeWords);
 
     QPixmap pixmap(":/osg3DViewer/mag.png");
-    m_pSearchButton->setIcon(QIcon(pixmap));
-    m_pSearchButton->setIconSize(pixmap.size());
-    m_pSearchButton->setCursor(Qt::ArrowCursor);
+    m_searchButton->setIcon(QIcon(pixmap));
+    m_searchButton->setIconSize(pixmap.size());
+    m_searchButton->setCursor(Qt::ArrowCursor);
 #if defined(Q_OS_LINUX)
-    m_pSearchButton->setStyleSheet("QToolButton { border: none; padding: 0px; margin-left: 3px; }");
+    m_searchButton->setStyleSheet("QToolButton { border: none; padding: 0px; margin-left: 3px; }");
     setTextMargins(pixmap.width() + 6, 0, 0, 0);
 #elif defined(Q_OS_WIN32)
-    m_pSearchButton->setStyleSheet("QToolButton { border: none; padding: 0px; margin-left: 1px; }");
+    m_searchButton->setStyleSheet("QToolButton { border: none; padding: 0px; margin-left: 1px; }");
     setTextMargins(pixmap.width() + 3, 0, 0, 0);
 #endif
     setInactiveText(tr("<type text>"));
 
-    connect(m_pSearchButton, SIGNAL(clicked()), this, SLOT(slotShowOptionMenuTriggered()));
+    connect(m_searchButton, SIGNAL(clicked()), this, SLOT(slotShowOptionMenuTriggered()));
     connect(this, SIGNAL(textEdited(QString)), this, SLOT(slotTextEdited(QString)));
 }
 
@@ -78,11 +78,11 @@ QMenu* xSearchLineEdit::createOptionMenu(bool enableCaseSensitive, bool enableWh
 {
     QMenu* optionMenu = new QMenu(this);
 
-    m_pCaseSensitive = new QAction(tr("Case Sensitive"), this);
-    m_pCaseSensitive->setCheckable(true);
-    m_pCaseSensitive->setChecked(enableCaseSensitive);
-    connect(m_pCaseSensitive, SIGNAL(toggled(bool)), this, SIGNAL(sigCaseSensitiveToggled(bool)));
-    optionMenu->addAction(m_pCaseSensitive);
+    m_caseSensitiveAction = new QAction(tr("Case Sensitive"), this);
+    m_caseSensitiveAction->setCheckable(true);
+    m_caseSensitiveAction->setChecked(enableCaseSensitive);
+    connect(m_caseSensitiveAction, SIGNAL(toggled(bool)), this, SIGNAL(sigCaseSensitiveToggled(bool)));
+    optionMenu->addAction(m_caseSensitiveAction);
     return optionMenu;
 }
 
@@ -103,10 +103,10 @@ void xSearchLineEdit::resizeEvent(QResizeEvent* event)
 {
     QLineEdit::resizeEvent(event);
 
-    int y = (size().height() - m_pSearchButton->iconSize().height()) / 2 - 1;
+    int y = (size().height() - m_searchButton->iconSize().height()) / 2 - 1;
 
     if (y > 0)
-        m_pSearchButton->move(m_pSearchButton->x(), y);
+        m_searchButton->move(m_searchButton->x(), y);
 }
 
 void xSearchLineEdit::paintEvent(QPaintEvent* event)
@@ -136,7 +136,7 @@ void xSearchLineEdit::slotTextEdited(QString text)
 
 void xSearchLineEdit::slotShowOptionMenuTriggered()
 {
-    Q_ASSERT(m_pOptionMenu);
+    Q_ASSERT(m_optionMenu);
 
-    m_pOptionMenu->exec(QCursor::pos());
+    m_optionMenu->exec(QCursor::pos());
 }

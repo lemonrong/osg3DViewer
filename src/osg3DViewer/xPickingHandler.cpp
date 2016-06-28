@@ -32,12 +32,12 @@ using namespace osgGA;
 
 xPickingHandler::xPickingHandler() :
     TrackballManipulator(),
-    m_pViewer(NULL),
-    m_nDummy(0),
-    m_bRecenter(false),
-    m_bPicking(false),
-    m_bTrackballHelper(false),
-    m_bInverseMouseWheel(false)
+    m_viewer(NULL),
+    m_dummy(0),
+    m_isRecenter(false),
+    m_isPicking(false),
+    m_isTrackballHelper(false),
+    m_isInverseMouseWheel(false)
 {}
 
 xPickingHandler::~xPickingHandler()
@@ -67,8 +67,8 @@ void xPickingHandler::getUsage(osg::ApplicationUsage& usage) const
 bool xPickingHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& us)
 {
     bool handled = false;
-    m_pViewer = dynamic_cast<osgViewer::View*>(&us);
-    if (!m_pViewer)
+    m_viewer = dynamic_cast<osgViewer::View*>(&us);
+    if (!m_viewer)
         return false;
 
     switch(ea.getEventType())
@@ -85,12 +85,12 @@ bool xPickingHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAd
             if (ea.getButtonMask()==osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON)
             {
                 pick(ea);
-                if (m_bTrackballHelper)
+                if (m_isTrackballHelper)
                     emit sigRotateView();
             }
-            else if (ea.getButtonMask()==osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON && m_bTrackballHelper)
+            else if (ea.getButtonMask()==osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON && m_isTrackballHelper)
                 emit sigDragView();
-            else if (ea.getButtonMask()==osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON && m_bTrackballHelper)
+            else if (ea.getButtonMask()==osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON && m_isTrackballHelper)
                 emit sigZoomViewIn();
             break;
         }
@@ -102,13 +102,13 @@ bool xPickingHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAd
                 case GUIEventAdapter::SCROLL_UP:
 
                     //handle scroll down;
-                    zoom(ZOOMIN,m_bInverseMouseWheel);
+                    zoom(ZOOMIN,m_isInverseMouseWheel);
                     handled = true;
                     break;
                 case GUIEventAdapter::SCROLL_DOWN:
 
                     //handle scroll up
-                    zoom(ZOOMOUT,m_bInverseMouseWheel);
+                    zoom(ZOOMOUT,m_isInverseMouseWheel);
                     handled = true;
                     break;
                 default:
@@ -122,12 +122,12 @@ bool xPickingHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAd
         {
             if (ea.getKey() == GUIEventAdapter::KEY_Shift_L || ea.getKey() == GUIEventAdapter::KEY_Shift_R)
             {
-                m_bRecenter = true;
+                m_isRecenter = true;
                 handled = true;
             }
             else if (ea.getKey() == GUIEventAdapter::KEY_Control_L || ea.getKey() == GUIEventAdapter::KEY_Control_R)
             {
-                m_bPicking = true;
+                m_isPicking = true;
                 handled = true;
             }
             else if (ea.getKey()== GUIEventAdapter::KEY_Space)
@@ -142,17 +142,17 @@ bool xPickingHandler::handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAd
 
         case (GUIEventAdapter::KEYUP):
         {
-            m_bRecenter = false;
-            m_bPicking = false;
+            m_isRecenter = false;
+            m_isPicking = false;
 			
             if (ea.getKey() == GUIEventAdapter::KEY_Shift_L || ea.getKey() == GUIEventAdapter::KEY_Shift_R)
             {
-                m_bRecenter = false;
+                m_isRecenter = false;
                 handled = true;
             }
             else if (ea.getKey() == GUIEventAdapter::KEY_Control_L || ea.getKey() == GUIEventAdapter::KEY_Control_R)
             {
-                m_bPicking = false;
+                m_isPicking = false;
                 handled = true;
             }
             break;
@@ -184,7 +184,7 @@ void xPickingHandler::zoom(int sens, int inverse)
         if (_distance > 1e+7)
             _distance = 1e+7;
 
-        if (m_bTrackballHelper)
+        if (m_isTrackballHelper)
             emit sigZoomViewIn();
     }
     else
@@ -193,17 +193,17 @@ void xPickingHandler::zoom(int sens, int inverse)
         if (_distance < 0.05)
             _distance = 0.05;
 
-        if (m_bTrackballHelper)
+        if (m_isTrackballHelper)
             emit sigZoomViewOut();
     }
 }
 
 void xPickingHandler::pick(const osgGA::GUIEventAdapter& ea)
 {
-    if (!m_bRecenter && !m_bPicking)
+    if (!m_isRecenter && !m_isPicking)
         return;
 
-    osg::Node* scene = m_pViewer->getSceneData();
+    osg::Node* scene = m_viewer->getSceneData();
     if (!scene)
         return;
 
@@ -221,7 +221,7 @@ void xPickingHandler::pick(const osgGA::GUIEventAdapter& ea)
 
         osgUtil::IntersectionVisitor iv(picker);
 
-        m_pViewer->getCamera()->accept(iv);
+        m_viewer->getCamera()->accept(iv);
 
         if (picker->containsIntersections())
         {
@@ -236,20 +236,20 @@ void xPickingHandler::pick(const osgGA::GUIEventAdapter& ea)
     {
         // use window coordinates
         // remap the mouse x,y into viewport coordinates.
-        osg::Viewport* viewport = m_pViewer->getCamera()->getViewport();
+        osg::Viewport* viewport = m_viewer->getCamera()->getViewport();
         float mx = viewport->x() + (int)((float)viewport->width() * (ea.getXnormalized() * 0.5f + 0.5f));
         float my = viewport->y() + (int)((float)viewport->height() * (ea.getYnormalized() * 0.5f + 0.5f));
         osgUtil::LineSegmentIntersector* picker = new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, mx, my);
 
         osgUtil::IntersectionVisitor iv(picker);
 
-        m_pViewer->getCamera()->accept(iv);
+        m_viewer->getCamera()->accept(iv);
 
         if (picker->containsIntersections())
         {
             osgUtil::LineSegmentIntersector::Intersection intersection = picker->getFirstIntersection();
 
-            if (m_bRecenter)
+            if (m_isRecenter)
             {
                 osg::NodePath& nodePath = intersection.nodePath;
                 node = (nodePath.size()>=1) ? nodePath[nodePath.size() - 1] : 0;

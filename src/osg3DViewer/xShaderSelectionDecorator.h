@@ -47,7 +47,7 @@ protected:
 private:
     bool loadShader();
 
-    osg::ref_ptr<osg::PolygonOffset> m_pPolyOffset; //!< PolygonOffset attribute for highlighting.
+    osg::ref_ptr<osg::PolygonOffset> m_polygonOffset; //!< PolygonOffset attribute for highlighting.
     osg::ref_ptr<osg::Program> m_program;
     osg::ref_ptr<osg::Uniform> m_glowFactor;
 };

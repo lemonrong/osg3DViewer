@@ -118,13 +118,13 @@ private:
 
 private:
 	Ui::MainWindow ui;
-	osg::ref_ptr<osg::Node> m_ptrRootNode;
-	xSceneView *m_pSceneView;
-	xSceneModel *m_pSceneModel;
+	osg::ref_ptr<osg::Node> m_rootNode;
+	xSceneView *m_sceneView;
+	xSceneModel *m_sceneModel;
 
-	QList<QWidget *> m_listDock;
-	xTreeModel *m_pTreeModel;
-	xTreeView *m_pTreeView;
+	QList<QWidget *> m_dockWidgets;
+	xTreeModel *m_treeModel;
+	xTreeView *m_treeView;
 
 	QString m_appName;
 	QString m_version;
@@ -137,22 +137,22 @@ private:
     QStringList m_recentFiles;
 
 	// for Lod factor manipulation
-	QLabel *m_pLODFactorLabel;
-	float m_fLODFactor;
+	QLabel *m_LODFactorLabel;
+	float m_LODFactor;
 	
-	bool m_bOptimize;
+	bool m_isOptimized;
 
-	xObjectLoader *m_pObjectLoader;
+	xObjectLoader *m_objectLoader;
     // display aspect ratio of the central windows
-    QLabel *m_pAspectRatioLabel;
+    QLabel *m_aspectRatioLabel;
 
 	// for search function
-	bool m_bCaseSensitive;
-	QCompleter *m_pCompleterSearch;
+	bool m_isCaseSensitive;
+	QCompleter *m_completerSearch;
 	QModelIndex m_currSearchIndex;
-	xSearchLineEdit *m_pLineEditSearch;
+	xSearchLineEdit *m_lineEditSearch;
 	
-	xPropertyWidget *m_pPropertyWidget;
+	xPropertyWidget *m_propertyWidget;
 };
 
 #endif 

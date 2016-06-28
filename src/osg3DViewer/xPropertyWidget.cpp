@@ -36,24 +36,24 @@
 
 xPropertyWidget::xPropertyWidget(QWidget *parent) :  QtTreePropertyBrowser(parent)
 {
-    m_pVariantManager = new QtVariantPropertyManager(this);
+    m_variantManager = new QtVariantPropertyManager(this);
     initDictionaries();
 }
 
 void xPropertyWidget::initDictionaries()
 {
     // Data variance
-    m_listDataVariance << "DYNAMIC";
-    m_listDataVariance << "STATIC";
-    m_listDataVariance << "UNSPECIFIED";
+    m_dataVariances << "DYNAMIC";
+    m_dataVariances << "STATIC";
+    m_dataVariances << "UNSPECIFIED";
 
     // LOD Center mode
-    m_listCenterMode << tr("USE_BOUNDING_SPHERE_CENTER");
-    m_listCenterMode << tr("USER_DEFINED_CENTER");
+    m_centerModes << tr("USE_BOUNDING_SPHERE_CENTER");
+    m_centerModes << tr("USER_DEFINED_CENTER");
 
     // LOD Range mode
-    m_listRangeMode << tr("DISTANCE_FROM_EYE_POINT");
-    m_listRangeMode << tr("PIXEL_SIZE_ON_SCREEN");
+    m_rangeModes << tr("DISTANCE_FROM_EYE_POINT");
+    m_rangeModes << tr("PIXEL_SIZE_ON_SCREEN");
 }
 
 void xPropertyWidget::displayProperties(osg::Node *node)
@@ -81,18 +81,18 @@ void xPropertyWidget::displayNodeProperties(osg::Node *node)
     // Name
     if (!node->getName().empty())
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Name"));
-        parent->setValue(m_listDataVariance[node->getDataVariance()]);
+        parent = m_variantManager->addProperty(QVariant::String, tr("Name"));
+        parent->setValue(m_dataVariances[node->getDataVariance()]);
         addProperty(parent);
     }
 
     // data variance
-    parent = m_pVariantManager->addProperty(QVariant::String, tr("Data Variance"));
+    parent = m_variantManager->addProperty(QVariant::String, tr("Data Variance"));
     parent->setValue(node->getName().c_str());
     addProperty(parent);
 
     // Node Mask
-    parent = m_pVariantManager->addProperty(QVariant::String, tr("Node Mask"));
+    parent = m_variantManager->addProperty(QVariant::String, tr("Node Mask"));
     parent->setValue(QString("0x%1").arg(QString().setNum((unsigned int)node->getNodeMask(), 16)));
     addProperty(parent);
 }
@@ -106,38 +106,38 @@ void xPropertyWidget::displayLODProperties(osg::LOD *node)
     QtVariantProperty *parent;
 
     // Center Mode
-    parent = m_pVariantManager->addProperty(QVariant::String, tr("Center Mode"));
-    parent->setValue(m_listCenterMode[node->getCenterMode()]);
+    parent = m_variantManager->addProperty(QVariant::String, tr("Center Mode"));
+    parent->setValue(m_centerModes[node->getCenterMode()]);
     addProperty(parent);
 
     // Range Mode
-    parent = m_pVariantManager->addProperty(QVariant::String, tr("Center Mode"));
-    parent->setValue(m_listRangeMode[node->getRangeMode()]);
+    parent = m_variantManager->addProperty(QVariant::String, tr("Center Mode"));
+    parent->setValue(m_rangeModes[node->getRangeMode()]);
     addProperty(parent);
 
     // Center
-    parent = m_pVariantManager->addProperty(QVariant::String, tr("Center"));
+    parent = m_variantManager->addProperty(QVariant::String, tr("Center"));
     parent->setValue("");
     addProperty(parent);
 
-    property = m_pVariantManager->addProperty(QVariant::Double, tr("X"));
+    property = m_variantManager->addProperty(QVariant::Double, tr("X"));
     property->setValue(node->getCenter().x());
     parent->addSubProperty(property);
 
-    property = m_pVariantManager->addProperty(QVariant::Double, tr("Y"));
+    property = m_variantManager->addProperty(QVariant::Double, tr("Y"));
     property->setValue(node->getCenter().y());
     parent->addSubProperty(property);
 
-    property = m_pVariantManager->addProperty(QVariant::Double, tr("Z"));
+    property = m_variantManager->addProperty(QVariant::Double, tr("Z"));
     property->setValue(node->getCenter().z());
     parent->addSubProperty(property);
 
-    parent = m_pVariantManager->addProperty(QVariant::Double, tr("Radius"));
+    parent = m_variantManager->addProperty(QVariant::Double, tr("Radius"));
     parent->setValue(node->getRadius());
     addProperty(parent);
 
     // Range list
-    parent = m_pVariantManager->addProperty(QVariant::String, tr("Range list"));
+    parent = m_variantManager->addProperty(QVariant::String, tr("Range list"));
     parent->setValue("");
     addProperty(parent);
 
@@ -146,7 +146,7 @@ void xPropertyWidget::displayLODProperties(osg::LOD *node)
     for (unsigned int i = 0; i<rangeList.size(); i++)
     {
         ranges.push_back(rangeList[i].second);
-        property = m_pVariantManager->addProperty(QVariant::Double, tr("Range"));
+        property = m_variantManager->addProperty(QVariant::Double, tr("Range"));
         property->setValue(rangeList[i].second);
         parent->addSubProperty(property);
     }
@@ -161,14 +161,14 @@ void xPropertyWidget::displaySwitchProperties(osg::Switch *node)
     QtVariantProperty *parent;
 
     // Range list
-    parent = m_pVariantManager->addProperty(QVariant::String, tr("Value list"));
+    parent = m_variantManager->addProperty(QVariant::String, tr("Value list"));
     parent->setValue("");
     addProperty(parent);
 
     osg::Switch::ValueList valueList = node->getValueList();
     for (unsigned int i = 0; i<valueList.size(); i++)
     {
-        property = m_pVariantManager->addProperty(QVariant::Bool, tr("Value"));
+        property = m_variantManager->addProperty(QVariant::Bool, tr("Value"));
         property->setValue((bool)valueList[i]);
         parent->addSubProperty(property);
     }
@@ -187,19 +187,19 @@ void xPropertyWidget::displayGeodeProperties(osg::Geode *node)
     const osg::BoundingBox& bBox = node->getBoundingBox();
 
     // Size
-    parent = m_pVariantManager->addProperty(QVariant::String, tr("Size"));
+    parent = m_variantManager->addProperty(QVariant::String, tr("Size"));
     parent->setValue("");
     addProperty(parent);
 
-    property = m_pVariantManager->addProperty(QVariant::Double, tr("Height"));
+    property = m_variantManager->addProperty(QVariant::Double, tr("Height"));
     property->setValue(bBox.zMin() - bBox.zMin());
     parent->addSubProperty(property);
 
-    property = m_pVariantManager->addProperty(QVariant::Double, tr("Width"));
+    property = m_variantManager->addProperty(QVariant::Double, tr("Width"));
     property->setValue(bBox.yMin() - bBox.yMin());
     parent->addSubProperty(property);
 
-    property = m_pVariantManager->addProperty(QVariant::Double, tr("Length"));
+    property = m_variantManager->addProperty(QVariant::Double, tr("Length"));
     property->setValue(bBox.xMin() - bBox.xMin());
     parent->addSubProperty(property);
 }
@@ -220,64 +220,64 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     const osg::BoundingBox bBox = ext.GetBound();
 
     // Size
-    parent = m_pVariantManager->addProperty(QVariant::String, tr("Size"));
+    parent = m_variantManager->addProperty(QVariant::String, tr("Size"));
     parent->setValue("");
     addProperty(parent);
 
-    property = m_pVariantManager->addProperty(QVariant::Double, tr("Height"));
+    property = m_variantManager->addProperty(QVariant::Double, tr("Height"));
     property->setValue(bBox.zMin() - bBox.zMin());
     parent->addSubProperty(property);
 
-    property = m_pVariantManager->addProperty(QVariant::Double, tr("Width"));
+    property = m_variantManager->addProperty(QVariant::Double, tr("Width"));
     property->setValue(bBox.yMin() - bBox.yMin());
     parent->addSubProperty(property);
 
-    property = m_pVariantManager->addProperty(QVariant::Double, tr("Length"));
+    property = m_variantManager->addProperty(QVariant::Double, tr("Length"));
     property->setValue(bBox.xMin() - bBox.xMin());
     parent->addSubProperty(property);
 
     // Center
-    parent = m_pVariantManager->addProperty(QVariant::String, tr("Center Point"));
+    parent = m_variantManager->addProperty(QVariant::String, tr("Center Point"));
     parent->setValue("");
     addProperty(parent);
 
-    property = m_pVariantManager->addProperty(QVariant::Double, tr("X"));
+    property = m_variantManager->addProperty(QVariant::Double, tr("X"));
     property->setValue(bBox.center().x());
     parent->addSubProperty(property);
 
-    property = m_pVariantManager->addProperty(QVariant::Double, tr("Y"));
+    property = m_variantManager->addProperty(QVariant::Double, tr("Y"));
     property->setValue(bBox.center().y());
     parent->addSubProperty(property);
 
-    property = m_pVariantManager->addProperty(QVariant::Double, tr("Z"));
+    property = m_variantManager->addProperty(QVariant::Double, tr("Z"));
     property->setValue(bBox.center().z());
     parent->addSubProperty(property);
 
     // Stats
-    parent = m_pVariantManager->addProperty(QVariant::String, tr("Total vertices"));
+    parent = m_variantManager->addProperty(QVariant::String, tr("Total vertices"));
     parent->setValue((unsigned int)cv._vertices);
     addProperty(parent);
 
-    parent = m_pVariantManager->addProperty(QVariant::String, tr("Max depth"));
+    parent = m_variantManager->addProperty(QVariant::String, tr("Max depth"));
     parent->setValue((unsigned int)cv._maxDepth);
     addProperty(parent);
 
     if (cv._slowPathGeometries)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Slow path Geometries"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Slow path Geometries"));
         parent->setValue((unsigned int)cv._slowPathGeometries);
         addProperty(parent);
     }
 
     // ostr << "             Groups \t" << _groups << "\t" << _uGroups.size() << std::endl;
-    parent = m_pVariantManager->addProperty(QVariant::String, tr("Groups"));
+    parent = m_variantManager->addProperty(QVariant::String, tr("Groups"));
     parent->setValue((unsigned int)cv._groups);
     addProperty(parent);
 
     // ostr << "               LODs \t" << _lods << "\t" << _uLods.size() << std::endl;
     if (cv._lods)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Groups"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Groups"));
         parent->setValue((unsigned int)cv._lods);
         addProperty(parent);
     }
@@ -285,7 +285,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "          PagedLODs \t" << _pagedLods << "\t" << _uPagedLods.size() << std::endl;
     if (cv._pagedLods)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("PagedLODs"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("PagedLODs"));
         parent->setValue((unsigned int)cv._pagedLods);
         addProperty(parent);
     }
@@ -293,7 +293,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "           Switches \t" << _switches << "\t" << _uSwitches.size() << std::endl;
     if (cv._switches)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Switches"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Switches"));
         parent->setValue((unsigned int)cv._switches);
         addProperty(parent);
     }
@@ -301,7 +301,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "          Sequences \t" << _sequences << "\t" << _uSequences.size() << std::endl;
     if (cv._sequences)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Sequences"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Sequences"));
         parent->setValue((unsigned int)cv._sequences);
         addProperty(parent);
     }
@@ -309,7 +309,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "   MatrixTransforms \t" << _matrixTransforms << "\t" << _uMatrixTransforms.size() << std::endl;
     if (cv._matrixTransforms)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("MatrixTransforms"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("MatrixTransforms"));
         parent->setValue((unsigned int)cv._matrixTransforms);
         addProperty(parent);
     }
@@ -317,7 +317,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "      DOFTransforms \t" << _dofTransforms << "\t" << _uDofTransforms.size() << std::endl;
     if (cv._dofTransforms)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("DOFTransforms"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("DOFTransforms"));
         parent->setValue((unsigned int)cv._dofTransforms);
         addProperty(parent);
     }
@@ -325,7 +325,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "   Other Transforms \t" << _transforms << "\t" << _uTransforms.size() << std::endl;
     if (cv._transforms)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Other Transforms"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Other Transforms"));
         parent->setValue((unsigned int)cv._transforms);
         addProperty(parent);
     }
@@ -333,7 +333,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "             Geodes \t" << _geodes << "\t" << _uGeodes.size() << std::endl;
     if (cv._geodes)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Geodes"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Geodes"));
         parent->setValue((unsigned int)cv._geodes);
         addProperty(parent);
     }
@@ -341,7 +341,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "        Other Nodes \t" << _nodes << "\t" << _uNodes.size() << std::endl;
     if (cv._nodes)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Other Nodes"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Other Nodes"));
         parent->setValue((unsigned int)cv._nodes);
         addProperty(parent);
     }
@@ -349,7 +349,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "    Empty StateSets \t" << _emptyStateSets << std::endl;
     if (cv._emptyStateSets)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Empty StateSets"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Empty StateSets"));
         parent->setValue((unsigned int)cv._emptyStateSets);
         addProperty(parent);
     }
@@ -357,7 +357,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "    Total StateSets \t" << _stateSets << "\t" << _uStateSets.size() << std::endl;
     if (cv._stateSets)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Total StateSets"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Total StateSets"));
         parent->setValue((unsigned int)cv._stateSets);
         addProperty(parent);
     }
@@ -365,7 +365,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "           Programs \t" << _programs << "\t" << _uPrograms.size() << std::endl;
     if (cv._programs)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Programs"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Programs"));
         parent->setValue((unsigned int)cv._programs);
         addProperty(parent);
     }
@@ -373,7 +373,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "           Uniforms \t" << _uniforms << "\t" << _uUniforms.size() << std::endl;
     if (cv._uniforms)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Uniforms"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Uniforms"));
         parent->setValue((unsigned int)cv._uniforms);
         addProperty(parent);
     }
@@ -381,7 +381,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "   Total Attributes \t" << _attributes << "\t" << _uAttributes.size() << std::endl;
     if (cv._attributes)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Total Attributes"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Total Attributes"));
         parent->setValue((unsigned int)cv._attributes);
         addProperty(parent);
     }
@@ -389,7 +389,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "        Total Modes \t" << _modes << std::endl;
     if (cv._modes)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Total Modes"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Total Modes"));
         parent->setValue((unsigned int)cv._modes);
         addProperty(parent);
     }
@@ -397,7 +397,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "           Textures \t" << _textures << "\t" << _uTextures.size() << std::endl;
     if (cv._textures)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Textures"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Textures"));
         parent->setValue((unsigned int)cv._textures);
         addProperty(parent);
     }
@@ -405,7 +405,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "Total TexAttributes \t" << _texAttributes << "\t" << _uTexAttributes.size() << std::endl;
     if (cv._texAttributes)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Total TexAttributes"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Total TexAttributes"));
         parent->setValue((unsigned int)cv._texAttributes);
         addProperty(parent);
     }
@@ -413,7 +413,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "     Total TexModes \t" << _texModes << std::endl;
     if (cv._texModes)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Total TexModes"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Total TexModes"));
         parent->setValue((unsigned int)cv._texModes);
         addProperty(parent);
     }
@@ -421,7 +421,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "    NULL Geometries \t" << _nullGeometries << std::endl;
     if (cv._nullGeometries)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("NULL Geometries"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("NULL Geometries"));
         parent->setValue((unsigned int)cv._nullGeometries);
         addProperty(parent);
     }
@@ -429,7 +429,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "   Total Geometries \t" << _geometries << "\t" << _uGeometries.size() << std::endl;
     if (cv._geometries)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Total Geometries"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Total Geometries"));
         parent->setValue((unsigned int)cv._geometries);
         addProperty(parent);
     }
@@ -437,7 +437,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "              Texts \t" << _texts << "\t" << _uTexts.size() << std::endl;
     if (cv._texts)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Texts"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Texts"));
         parent->setValue((unsigned int)cv._texts);
         addProperty(parent);
     }
@@ -445,7 +445,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "    Other Drawables \t" << _drawables << "\t" << _uDrawables.size() << std::endl;
     if (cv._drawables)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Other Drawables"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Other Drawables"));
         parent->setValue((unsigned int)cv._drawables);
         addProperty(parent);
     }
@@ -453,7 +453,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "    Total Drawables \t" << _totalDrawables << std::endl;
     if (cv._totalDrawables)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Total Drawables"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Total Drawables"));
         parent->setValue((unsigned int)cv._totalDrawables);
         addProperty(parent);
     }
@@ -461,7 +461,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "         DrawArrays \t" << _drawArrays << "\t" << _uDrawArrays.size() << std::endl;
     if (cv._drawArrays)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("DrawArrays"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("DrawArrays"));
         parent->setValue((unsigned int)cv._drawArrays);
         addProperty(parent);
     }
@@ -469,7 +469,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "Total PrimitiveSets \t" << _primitiveSets << "\t" << _uPrimitiveSets.size() << std::endl;
     if (cv._primitiveSets)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Total PrimitiveSets"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Total PrimitiveSets"));
         parent->setValue((unsigned int)cv._primitiveSets);
         addProperty(parent);
     }
@@ -477,7 +477,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "Total vertices: " << _vertices << std::endl;
     if (cv._vertices)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Total vertices"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Total vertices"));
         parent->setValue((unsigned int)cv._vertices);
         addProperty(parent);
     }
@@ -485,7 +485,7 @@ void xPropertyWidget::displayBaseStats(osg::Node *node)
     //ostr << "Max depth: " << _maxDepth << std::endl;
     if (cv._maxDepth)
     {
-        parent = m_pVariantManager->addProperty(QVariant::String, tr("Max depth"));
+        parent = m_variantManager->addProperty(QVariant::String, tr("Max depth"));
         parent->setValue((unsigned int)cv._maxDepth);
         addProperty(parent);
     }

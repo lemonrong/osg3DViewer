@@ -82,7 +82,7 @@ protected:
     inline osg::Node* getPrivateData(const QModelIndex &index) const { return reinterpret_cast<osg::Node*>(index.internalPointer()); }
 
 private:
-    osg::ref_ptr<osg::Node> m_ptrNode;
+    osg::ref_ptr<osg::Node> m_node;
     QHash<QString, QIcon> m_hashIcon;
 };
 

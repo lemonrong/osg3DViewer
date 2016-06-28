@@ -54,10 +54,10 @@ const int castsShadowTraversalMask = 0x2;
 // --------------------------------------------------------------------------------
 xSceneModel::xSceneModel(QObject *parent) :
     QObject(parent),
-    m_bHighlightScene(false),
-	m_bShadowScene(false),
-	m_bTextrueScene(false),
-	m_bLightScene(false),
+    m_isHighlightScene(false),
+	m_isShadowScene(false),
+	m_isTextrueScene(false),
+	m_isLightScene(false),
     m_sceneCenter(osg::Vec3(0.0f,0.0f,0.0f))
 {
     // set the osg log to QT message
@@ -83,24 +83,24 @@ void xSceneModel::resetModel()
 
 bool xSceneModel::saveSceneData(const std::string & file)
 {
-    return osgDB::writeNodeFile(*m_pCurrentData, file);
+    return osgDB::writeNodeFile(*m_currentData, file);
 }
 
 void xSceneModel::setHighlightScene(bool val)
 {
-	if (m_bHighlightScene == val)
+	if (m_isHighlightScene == val)
 		return;
 
-	m_bHighlightScene = val;
-	if (m_bHighlightScene)
+	m_isHighlightScene = val;
+	if (m_isHighlightScene)
 	{
 		//osg::Group *parent = m_rootNodes->getParent(0);
-		m_pCurrentHightlight = new osgFX::Scribe();
-		m_pCurrentHightlight->setWireframeLineWidth(2.0);
-		m_pCurrentHightlight->setWireframeColor(osg::Vec4(1.0,1.0,1.0,1.0));
+		m_currentHightlight = new osgFX::Scribe();
+		m_currentHightlight->setWireframeLineWidth(2.0);
+		m_currentHightlight->setWireframeColor(osg::Vec4(1.0,1.0,1.0,1.0));
 
-		m_pCurrentHightlight->addChild(m_ptrRootShadowNodes);
-		m_pNodeScene->replaceChild(m_ptrRootShadowNodes, m_pCurrentHightlight);
+		m_currentHightlight->addChild(m_rootShadowNode);
+		m_sceneNode->replaceChild(m_rootShadowNode, m_currentHightlight);
 	}
 	else
 	{
@@ -110,46 +110,46 @@ void xSceneModel::setHighlightScene(bool val)
 		//	itr!=parentList.end();
 		//	++itr)
 		//	(*itr)->replaceChild(parentAsScribe,parentAsScribe->getChild(0));
-		m_pNodeScene->replaceChild(m_pCurrentHightlight, m_ptrRootShadowNodes);
+		m_sceneNode->replaceChild(m_currentHightlight, m_rootShadowNode);
 	}
 }
 
 osg::Node *xSceneModel::getScene()
 {
-    return m_pSwitchRoot;
+    return m_switchRoot;
 }
 
 osg::Node *xSceneModel::getObject()
 {
-    return m_pCurrentData;
+    return m_currentData;
 }
 
 void xSceneModel::createScene()
 {
     // init
-    m_pSwitchRoot = new osg::Switch(); // switch
-    m_pSwitchRoot->setName("rootSwitch");
+    m_switchRoot = new osg::Switch(); // switch
+    m_switchRoot->setName("rootSwitch");
 
-    m_pSwitchRoot->addChild(createSceneLight());
+    m_switchRoot->addChild(createSceneLight());
     // create and attach the scene nodes
-    m_pTransformSpinScene = new osg::MatrixTransform; // spin transform for global scene
-    m_pTransformSpinScene->setName("spinTransformScene");
-    m_pSwitchRoot->addChild(m_pTransformSpinScene);
+    m_transformSpinScene = new osg::MatrixTransform; // spin transform for global scene
+    m_transformSpinScene->setName("spinTransformScene");
+    m_switchRoot->addChild(m_transformSpinScene);
 
-    m_pNodeScene = new osg::Group(); // scene
-    m_pNodeScene->setName("NodeScene");
-    m_pTransformSpinScene->addChild(m_pNodeScene);
+    m_sceneNode = new osg::Group(); // scene
+    m_sceneNode->setName("NodeScene");
+    m_transformSpinScene->addChild(m_sceneNode);
 
 	// shadow node
-	m_ptrRootShadowNodes = new osgShadow::ShadowedScene();
-	m_ptrRootShadowNodes->setReceivesShadowTraversalMask(receivesShadowTraversalMask);
-	m_ptrRootShadowNodes->setCastsShadowTraversalMask(castsShadowTraversalMask);
-	m_ptrRootShadowNodes->setDataVariance(osg::Object::DYNAMIC);
-	m_pNodeScene->addChild(m_ptrRootShadowNodes.get());
+	m_rootShadowNode = new osgShadow::ShadowedScene();
+	m_rootShadowNode->setReceivesShadowTraversalMask(receivesShadowTraversalMask);
+	m_rootShadowNode->setCastsShadowTraversalMask(castsShadowTraversalMask);
+	m_rootShadowNode->setDataVariance(osg::Object::DYNAMIC);
+	m_sceneNode->addChild(m_rootShadowNode.get());
 
-	m_pCurrentData = new osg::Node();
-	m_pCurrentData->setName("currentData");
-	m_ptrRootShadowNodes->addChild(m_pCurrentData.get());
+	m_currentData = new osg::Node();
+	m_currentData->setName("currentData");
+	m_rootShadowNode->addChild(m_currentData.get());
 
 }
 
@@ -179,29 +179,29 @@ void xSceneModel::setData(osg::Node *data, bool resetHome)
 
     m_sceneCenter = osg::Vec3(0.0f,0.0f,0.0f);
 
-    m_ptrRootShadowNodes->removeChild(m_pCurrentData.get());
-    m_pCurrentData = data;
+    m_rootShadowNode->removeChild(m_currentData.get());
+    m_currentData = data;
 
     if (!data)
         return;
 
-    m_pCurrentData->setName("currentData");
+    m_currentData->setName("currentData");
 
-    m_ptrRootShadowNodes->addChild(m_pCurrentData.get());
+    m_rootShadowNode->addChild(m_currentData.get());
 
     // translate all the underlay layers to bottom
     //ExtentsVisitor ext;
     //m_currentData->accept(ext);
 
-    m_sceneCenter = m_pNodeScene->getBound().center();
+    m_sceneCenter = m_sceneNode->getBound().center();
 
-    if (m_bHighlightScene)
+    if (m_isHighlightScene)
     {
         setHighlightScene(false);
         setHighlightScene(true);
     }
 
-	setShadowEnabled(m_bShadowScene);
+	setShadowEnabled(m_isShadowScene);
     emit sigLoadFinished();
 }
 
@@ -210,13 +210,13 @@ void xSceneModel::setShadowEnabled(bool val)
 	if (val)
 	{
 		int alg = 3;
-		const osg::BoundingSphere& bs = m_ptrRootShadowNodes->getBound();
+		const osg::BoundingSphere& bs = m_rootShadowNode->getBound();
 		// test bidon pour modifier l'algo d'ombrage en fonction de la taille de l'objet
 		if (alg == 0)
 		{
 			osg::ref_ptr<osgShadow::ParallelSplitShadowMap> pssm = new osgShadow::ParallelSplitShadowMap(NULL,5);
 			pssm->setTextureResolution(2048);
-			m_ptrRootShadowNodes->setShadowTechnique(pssm.get());
+			m_rootShadowNode->setShadowTechnique(pssm.get());
 
 			pssm->init();
 		}
@@ -227,7 +227,7 @@ void xSceneModel::setShadowEnabled(bool val)
 			pssm->setTextureSize(osg::Vec2s(2048,2048));
 
 			//pssm->setTextureResolution(2048);
-			m_ptrRootShadowNodes->setShadowTechnique(pssm.get());
+			m_rootShadowNode->setShadowTechnique(pssm.get());
 
 			pssm->init();
 		}
@@ -237,13 +237,13 @@ void xSceneModel::setShadowEnabled(bool val)
 			pssm->setTextureSize(osg::Vec2s(2048,2048));
 
 			//pssm->setTextureResolution(2048);
-			m_ptrRootShadowNodes->setShadowTechnique(pssm.get());
+			m_rootShadowNode->setShadowTechnique(pssm.get());
 
 			pssm->init();
 		}
 	}
 	else
 	{
-		m_ptrRootShadowNodes->setShadowTechnique(NULL);
+		m_rootShadowNode->setShadowTechnique(NULL);
 	}
 }

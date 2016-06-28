@@ -87,16 +87,16 @@ private:
     bool fillAppLogFile(const QString &message);
 
     QMutex m_lock;
-    static xLogHandler* m_pInstance;
+    static xLogHandler* m_instance;
     LogLevel m_currLevel;
     QStringList m_buffer;
-    bool m_bBufferized;
-    bool m_bStartEmission;
-    QTimer *m_pTimer;
+    bool m_isBufferized;
+    bool m_isStartEmission;
+    QTimer *m_timer;
     QString m_logDirectory;
-    QTextStream * m_pLogStream;
-    QFile *m_pLogFile;
-    bool m_bSaveToLog;
+    QTextStream * m_logStream;
+    QFile *m_logFile;
+    bool m_isSaveToLog;
 };
 
 #endif  // _LOGHANDLER_H_

@@ -69,8 +69,8 @@ const int maxRecentlyOpenedFile = 10;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
-	m_pTreeModel(NULL),
-	m_pTreeView(NULL),
+	m_treeModel(NULL),
+	m_treeView(NULL),
     //m_currentSnapshotNum(0),
     //m_lastSnapshotName("snapshot"),
     m_appName(PACKAGE_NAME),
@@ -85,15 +85,15 @@ MainWindow::MainWindow(QWidget *parent)
     //m_inverseMouseWheel(false),
     //m_displayTrackballHelper(false),
     //m_optimize(false),
-    m_pLineEditSearch(NULL),
-    m_pSceneModel(NULL),
-    m_pLODFactorLabel(NULL),
-    m_fLODFactor(1.0f),
-    m_bOptimize(false),
-    m_pObjectLoader(NULL),
-    m_pAspectRatioLabel(NULL),
-    m_bCaseSensitive(false),
-    m_pCompleterSearch(0)
+    m_lineEditSearch(NULL),
+    m_sceneModel(NULL),
+    m_LODFactorLabel(NULL),
+    m_LODFactor(1.0f),
+    m_isOptimized(false),
+    m_objectLoader(NULL),
+    m_aspectRatioLabel(NULL),
+    m_isCaseSensitive(false),
+    m_completerSearch(0)
     //m_typeSnapshot(SNAPSHOT_FOR_FILE),
     //m_bmkDialog(NULL),
     //m_posterDialog(NULL),
@@ -107,11 +107,11 @@ MainWindow::MainWindow(QWidget *parent)
 	grid->setSpacing(0);
 	ui.centralwidget->setLayout(grid);
 
-	m_pSceneView = new xSceneView(ui.centralwidget);
-	grid->addWidget(m_pSceneView, 0, 0);
+	m_sceneView = new xSceneView(ui.centralwidget);
+	grid->addWidget(m_sceneView, 0, 0);
 
-	m_pPropertyWidget = new xPropertyWidget(ui.dockWidget_Properties);
-	ui.dockWidget_Properties->setWidget(m_pPropertyWidget);
+	m_propertyWidget = new xPropertyWidget(ui.dockWidget_Properties);
+	ui.dockWidget_Properties->setWidget(m_propertyWidget);
 
 	loadSettings();
     updateUi();
@@ -140,12 +140,12 @@ void MainWindow::updateUi()
     ui.textBrowserLog->document()->setMaximumBlockCount(1000);
 
     // create tree model
-    m_pTreeModel = new xTreeModel(this);
-	m_pTreeView = new xTreeView(ui.dockWidget_Model);
-	m_pTreeView->setModel(m_pTreeModel);
-	m_pSceneView->installEventFilter(this);
-	connect(m_pTreeView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotTreeNodeSelected(const QModelIndex &)), Qt::UniqueConnection);
-	connect(m_pTreeView, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotTreeViewCustomContextMenuRequested(const QPoint &)), Qt::UniqueConnection);
+    m_treeModel = new xTreeModel(this);
+	m_treeView = new xTreeView(ui.dockWidget_Model);
+	m_treeView->setModel(m_treeModel);
+	m_sceneView->installEventFilter(this);
+	connect(m_treeView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotTreeNodeSelected(const QModelIndex &)), Qt::UniqueConnection);
+	connect(m_treeView, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotTreeViewCustomContextMenuRequested(const QPoint &)), Qt::UniqueConnection);
 	//QVBoxLayout *pTreeWidgetLayout = new QVBoxLayout(this);
 	
 	QWidget *pStructureWidget = new QWidget(ui.dockWidget_Model);
@@ -153,44 +153,44 @@ void MainWindow::updateUi()
 	QVBoxLayout *pTreeLayout = new QVBoxLayout(pStructureWidget);
 	pStructureWidget->setLayout(pTreeLayout);
 	
-	m_pLineEditSearch = new xSearchLineEdit(ui.dockWidget_Model);
-	m_pLineEditSearch->setObjectName(QString::fromUtf8("lineEditSearch"));
+	m_lineEditSearch = new xSearchLineEdit(ui.dockWidget_Model);
+	m_lineEditSearch->setObjectName(QString::fromUtf8("lineEditSearch"));
 	QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	sizePolicy.setHorizontalStretch(0);
 	sizePolicy.setVerticalStretch(0);
-	sizePolicy.setHeightForWidth(m_pLineEditSearch->sizePolicy().hasHeightForWidth());
-	m_pLineEditSearch->setSizePolicy(sizePolicy);
-	connect(m_pLineEditSearch, SIGNAL(sigCaseSensitiveToggled(bool)), this, SLOT(slotSearchCaseSensitiveToggled(bool)), Qt::UniqueConnection);
-	connect(m_pLineEditSearch, SIGNAL(returnPressed()), this, SLOT(slotEditSearchReturnPressed()), Qt::UniqueConnection);
+	sizePolicy.setHeightForWidth(m_lineEditSearch->sizePolicy().hasHeightForWidth());
+	m_lineEditSearch->setSizePolicy(sizePolicy);
+	connect(m_lineEditSearch, SIGNAL(sigCaseSensitiveToggled(bool)), this, SLOT(slotSearchCaseSensitiveToggled(bool)), Qt::UniqueConnection);
+	connect(m_lineEditSearch, SIGNAL(returnPressed()), this, SLOT(slotEditSearchReturnPressed()), Qt::UniqueConnection);
 
-	pTreeLayout->addWidget(m_pLineEditSearch);
-	pTreeLayout->addWidget(m_pTreeView);
+	pTreeLayout->addWidget(m_lineEditSearch);
+	pTreeLayout->addWidget(m_treeView);
 	
     enableActions(false);
 
     // create the scene manager (scene model)
-	m_pSceneModel = new xSceneModel(this);
-	m_pSceneView->setModel(m_pSceneModel);
-	connect(m_pSceneModel, SIGNAL(sigLoadFinished()), m_pSceneView, SLOT(slotUpdateModel()), Qt::UniqueConnection);
+	m_sceneModel = new xSceneModel(this);
+	m_sceneView->setModel(m_sceneModel);
+	connect(m_sceneModel, SIGNAL(sigLoadFinished()), m_sceneView, SLOT(slotUpdateModel()), Qt::UniqueConnection);
 	
     //connect(ui->widgetSceneView,SIGNAL(newScreenshotAvailable(osg::Image *)),this,SLOT(takeIntoAccountScreenshot(osg::Image*)),Qt::QueuedConnection);
-    connect(m_pSceneView, SIGNAL(sigPicked(osg::Drawable*)), this, SLOT(slotSelectTreeItem(osg::Drawable*)));
-    connect(m_pSceneView, SIGNAL(sigNewAspectRatio(const QSize &)), this, SLOT(slotChangeAspectRatio(const QSize &)));
+    connect(m_sceneView, SIGNAL(sigPicked(osg::Drawable*)), this, SLOT(slotSelectTreeItem(osg::Drawable*)));
+    connect(m_sceneView, SIGNAL(sigNewAspectRatio(const QSize &)), this, SLOT(slotChangeAspectRatio(const QSize &)));
 
     // add a label to display the current aspect ratio of the  display (for bookmark)
-    m_pAspectRatioLabel = new QLabel(this);
-    QMainWindow::statusBar()->addPermanentWidget(m_pAspectRatioLabel);
+    m_aspectRatioLabel = new QLabel(this);
+    QMainWindow::statusBar()->addPermanentWidget(m_aspectRatioLabel);
 
     // add a label to display the LOD factor
-    m_pLODFactorLabel = new QLabel(this);
-    m_pLODFactorLabel->setText("LOD x1"); // set default value
-    QMainWindow::statusBar()->addPermanentWidget(m_pLODFactorLabel);
+    m_LODFactorLabel = new QLabel(this);
+    m_LODFactorLabel->setText("LOD x1"); // set default value
+    QMainWindow::statusBar()->addPermanentWidget(m_LODFactorLabel);
 
     // create a background loader
-    m_pObjectLoader = new xObjectLoader();
-    m_pObjectLoader->moveToThread(xThreadPool::getInstance()->getThread());
-    connect(this,SIGNAL(sigNewFileToLoad(const QString &)),m_pObjectLoader,SLOT(slotNewObjectToLoad(const QString &)));
-    connect(m_pObjectLoader,SIGNAL(sigNewObjectToView(osg::Node *)),this,SLOT(slotNewLoadedFile(osg::Node *)));
+    m_objectLoader = new xObjectLoader();
+    m_objectLoader->moveToThread(xThreadPool::getInstance()->getThread());
+    connect(this,SIGNAL(sigNewFileToLoad(const QString &)),m_objectLoader,SLOT(slotNewObjectToLoad(const QString &)));
+    connect(m_objectLoader,SIGNAL(sigNewObjectToView(osg::Node *)),this,SLOT(slotNewLoadedFile(osg::Node *)));
 
     //// bookmarks
     //connect(ui->widgetBookmarkManager,SIGNAL(newBookmarkRequest()),this,SLOT(on_actionNewBookmark_triggered()));
@@ -212,7 +212,7 @@ void MainWindow::on_actionSave_As_triggered()
 {
 	QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), m_lastDirectory, tr("OSG files (*.*)"));
 
-	m_pSceneModel->saveSceneData(fileName.toStdString());
+	m_sceneModel->saveSceneData(fileName.toStdString());
 	//osgDB::writeNodeFile(*m_rootNode.get(), fileName.toStdString());
 }
 void MainWindow::on_actionLoad_Shader_triggered()
@@ -255,7 +255,7 @@ void MainWindow::slotNewLoadedFile(osg::Node *node)
 		return;
 	}
 
-	m_pSceneModel->setData(node);
+	m_sceneModel->setData(node);
 
 	// update the window title
 	setWindowTitle(m_appName + " " + m_version + " - " + QFileInfo(m_currFile).fileName());
@@ -267,15 +267,15 @@ void MainWindow::slotNewLoadedFile(osg::Node *node)
 	// enable actions
 	enableActions(true);
 
-	m_pTreeModel->setNode(node);
+	m_treeModel->setNode(node);
 
 	// arrange display
-	QModelIndex i = m_pTreeModel->index(0, 0, m_pTreeView->rootIndex());
-	m_pTreeView->setExpanded(i,true);
-	m_pTreeView->resizeColumnToContents(0);
+	QModelIndex i = m_treeModel->index(0, 0, m_treeView->rootIndex());
+	m_treeView->setExpanded(i,true);
+	m_treeView->resizeColumnToContents(0);
 
 	// update completer for find
-	delete m_pCompleterSearch;
+	delete m_completerSearch;
 
 	xFindNameListVisitor visit;
 	node->accept(visit);
@@ -283,15 +283,15 @@ void MainWindow::slotNewLoadedFile(osg::Node *node)
 	QStringList nameList = visit.getNameList();
 	nameList.removeDuplicates();
 
-	m_pCompleterSearch = new QCompleter(nameList, this);
-	m_pLineEditSearch->setCompleter(m_pCompleterSearch);
-	if (m_bCaseSensitive)
-		m_pCompleterSearch->setCaseSensitivity(Qt::CaseSensitive);
+	m_completerSearch = new QCompleter(nameList, this);
+	m_lineEditSearch->setCompleter(m_completerSearch);
+	if (m_isCaseSensitive)
+		m_completerSearch->setCaseSensitivity(Qt::CaseSensitive);
 	else
-		m_pCompleterSearch->setCaseSensitivity(Qt::CaseInsensitive);
+		m_completerSearch->setCaseSensitivity(Qt::CaseInsensitive);
 
 	// display stats
-	m_pPropertyWidget->displayProperties(node);
+	m_propertyWidget->displayProperties(node);
 
 	// init current index
 	m_currSearchIndex = QModelIndex();
@@ -467,8 +467,8 @@ void MainWindow::on_actionUnload_triggered()
     //    return; // cancel triggered !!
     //}
 
-    m_pSceneModel->setData(NULL);
-	m_pTreeModel->setNode(NULL);
+    m_sceneModel->setData(NULL);
+	m_treeModel->setNode(NULL);
 
     // disable actions because no more current file !!
     enableActions(false);
@@ -557,7 +557,7 @@ void MainWindow::loadSettings()
 
 void MainWindow::on_actionReset_View_triggered()
 {
-	m_pSceneView->home();
+	m_sceneView->home();
 }
 void MainWindow::on_actionFull_Screen_triggered(bool on)
 {
@@ -575,7 +575,7 @@ void MainWindow::on_actionFull_Screen_triggered(bool on)
 
 void MainWindow::on_actionShadow_triggered(bool val)
 {
-	m_pSceneView->setShadowEnabled(val);
+	m_sceneView->setShadowEnabled(val);
 }
 
 void MainWindow::on_actionTexture_triggered(bool val)
@@ -591,17 +591,17 @@ void MainWindow::on_actionTexture_triggered(bool val)
 	//}
 
 	//ui->actionCompass->setEnabled(!val);
-	m_pSceneView->setTextureEnabled(val);
+	m_sceneView->setTextureEnabled(val);
 }
 
 void MainWindow::on_actionLight_triggered(bool val)
 {
-	m_pSceneView->setLightingEnabled(val);
+	m_sceneView->setLightingEnabled(val);
 }
 
 void MainWindow::on_actionHighLight_triggered(bool val)
 {
-	m_pSceneView->setHighlightScene(val);
+	m_sceneView->setHighlightScene(val);
 }
 void MainWindow::on_pushButtonClearLog_pressed()
 {
@@ -634,54 +634,54 @@ void MainWindow::on_pushButtonSaveLog_pressed()
 }
 void MainWindow::on_actionBackFace_triggered(bool val)
 {
-    m_pSceneView->setBackfaceEnabled(!val);
+    m_sceneView->setBackfaceEnabled(!val);
 }
 void MainWindow::on_actionOptimize_triggered(bool val)
 {
-    m_bOptimize = val;
-    if (m_pObjectLoader != NULL)
+    m_isOptimized = val;
+    if (m_objectLoader != NULL)
     {
-        m_pObjectLoader->slotSetOptimization(m_bOptimize);
+        m_objectLoader->slotSetOptimization(m_isOptimized);
     }
 }
 
 void MainWindow::on_actionEnableNode_triggered()
 {
     //qDebug("on_actionEnableNode_activated");
-    QModelIndex index = m_pTreeView->currentIndex();
+    QModelIndex index = m_treeView->currentIndex();
 
     if ( !index.isValid() )
         return;
 
-    m_pTreeModel->setEnableIndex(index,true);
-    m_pTreeView->update();
+    m_treeModel->setEnableIndex(index,true);
+    m_treeView->update();
 }
 
 void MainWindow::on_actionDisableNode_triggered()
 {
-    QModelIndex index = m_pTreeView->currentIndex();
+    QModelIndex index = m_treeView->currentIndex();
 
     if ( !index.isValid() )
         return;
 
-    m_pTreeModel->setEnableIndex(index,false);
-    m_pTreeView->update();
+    m_treeModel->setEnableIndex(index,false);
+    m_treeView->update();
 }
 
 void MainWindow::on_actionExpandTree_triggered()
 {
-    QModelIndex index = m_pTreeView->currentIndex();
+    QModelIndex index = m_treeView->currentIndex();
 
     if ( !index.isValid() )
         return;
 
     expandReccursively(index);
-    m_pTreeView->resizeColumnToContents(0);
+    m_treeView->resizeColumnToContents(0);
 }
 
 void MainWindow::on_actionCollapseTree_triggered()
 {
-    QModelIndex index = m_pTreeView->currentIndex();
+    QModelIndex index = m_treeView->currentIndex();
 
     if ( !index.isValid() )
         return;
@@ -694,13 +694,13 @@ void MainWindow::expandReccursively(const QModelIndex &index)
     if ( !index.isValid() )
         return;
 
-    for (int i = 0; i < m_pTreeModel->rowCount(index); i++)
+    for (int i = 0; i < m_treeModel->rowCount(index); i++)
     {
         QModelIndex ind = index.child(i,0);
         expandReccursively(ind);
     }
 
-    m_pTreeView->expand(index);
+    m_treeView->expand(index);
 }
 
 void MainWindow::collapseReccursively(const QModelIndex &index)
@@ -708,9 +708,9 @@ void MainWindow::collapseReccursively(const QModelIndex &index)
     if ( !index.isValid() )
         return;
 
-    m_pTreeView->collapse(index);
+    m_treeView->collapse(index);
 
-    for (int i = 0; i < m_pTreeModel->rowCount(index); i++)
+    for (int i = 0; i < m_treeModel->rowCount(index); i++)
     {
         QModelIndex ind = index.child(i,0);
         collapseReccursively(ind);
@@ -718,19 +718,19 @@ void MainWindow::collapseReccursively(const QModelIndex &index)
 }
 void MainWindow::on_actionCenterOnSelection_triggered()
 {
-    QModelIndex index = m_pTreeView->currentIndex();
+    QModelIndex index = m_treeView->currentIndex();
 
     if ( !index.isValid() )
         return;
 
-    m_pSceneView->centerOnNode( reinterpret_cast<osg::Node*>( index.internalPointer() ) );
+    m_sceneView->centerOnNode( reinterpret_cast<osg::Node*>( index.internalPointer() ) );
 
     // TODO !!!!
 }
 
 void MainWindow::slotTreeViewCustomContextMenuRequested(const QPoint & pos)
 {
-    QModelIndex index = m_pTreeView->indexAt(pos);
+    QModelIndex index = m_treeView->indexAt(pos);
 
     if ( !index.isValid() )
         return;
@@ -744,7 +744,7 @@ void MainWindow::slotTreeViewCustomContextMenuRequested(const QPoint & pos)
     menu.addAction(ui.actionExpandTree);
     menu.addAction(ui.actionCollapseTree);
 
-    menu.exec( m_pTreeView->viewport()->mapToGlobal(pos) );
+    menu.exec( m_treeView->viewport()->mapToGlobal(pos) );
 }
 
 void MainWindow::showDockWidgets()
@@ -753,11 +753,11 @@ void MainWindow::showDockWidgets()
 	QMainWindow::statusBar()->show();
 
 	// restore the dock widget state
-	foreach(QWidget * widget, m_listDock)
+	foreach(QWidget * widget, m_dockWidgets)
 	{
 		widget->show();
 	}
-	m_listDock.clear();
+	m_dockWidgets.clear();
 }
 
 void MainWindow::hideDockWidgets()
@@ -770,7 +770,7 @@ void MainWindow::hideDockWidgets()
 	{
 		if (widget->isVisible())
 		{
-			m_listDock << widget;
+			m_dockWidgets << widget;
 			widget->hide();
 		}
 	}
@@ -780,22 +780,22 @@ void MainWindow::slotTreeNodeSelected(const QModelIndex &index)
 {
 	if (index.isValid())
 	{
-		m_pSceneView->highlight((osg::Node *)index.internalPointer());
+		m_sceneView->highlight((osg::Node *)index.internalPointer());
 		// display Properties
 		//m_pSceneView->displayProperties((osg::Node *)index.internalPointer());
-		m_pPropertyWidget->displayProperties((osg::Node *)index.internalPointer());
+		m_propertyWidget->displayProperties((osg::Node *)index.internalPointer());
 	}
 }
 
 void MainWindow::slotSelectTreeItem(osg::Drawable *pDrawable)
 {
-	QModelIndex parentIndex = m_pTreeModel->searchForNode(pDrawable->getParent(0));
+	QModelIndex parentIndex = m_treeModel->searchForNode(pDrawable->getParent(0));
 
 	if (parentIndex.isValid())
 	{
-		m_pTreeView->setCurrentIndex(parentIndex);
-		m_pTreeView->scrollTo(parentIndex, QAbstractItemView::EnsureVisible);
-		m_pTreeView->resizeColumnToContents(0);
+		m_treeView->setCurrentIndex(parentIndex);
+		m_treeView->scrollTo(parentIndex, QAbstractItemView::EnsureVisible);
+		m_treeView->resizeColumnToContents(0);
 		slotTreeNodeSelected(parentIndex);
 	}
 }
@@ -805,13 +805,13 @@ void MainWindow::resetViews(bool allClear)
 	// clear current bookmark
 	//ui->widgetBookmarkManager->clearBookmark();
 
-	m_pSceneView->resetSelection();
+	m_sceneView->resetSelection();
 
 	// reset 3d view
 	if (allClear)
 	{
-		m_pTreeModel->setNode(NULL);
-		m_pSceneModel->setData(NULL);
+		m_treeModel->setNode(NULL);
+		m_sceneModel->setData(NULL);
 	}
 }
 void MainWindow::slotPrintToLog(const QString & mess)
@@ -825,7 +825,7 @@ void MainWindow::slotPrintToLog(const QStringList & mess)
 }
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-	if (obj == m_pSceneView)
+	if (obj == m_sceneView)
 	{
 		QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 		keyPressEvent(keyEvent);
@@ -865,29 +865,29 @@ void MainWindow::slotChangeAspectRatio(const QSize & sz)
 	if (sz.height())
 	{
 		float ratio = sz.width() / (float)sz.height();
-		m_pAspectRatioLabel->setText(tr("View aspect ratio: %1").arg(QString::number(ratio,'g',2)));
+		m_aspectRatioLabel->setText(tr("View aspect ratio: %1").arg(QString::number(ratio,'g',2)));
 	}
 }
 void MainWindow::slotSearchCaseSensitiveToggled(bool checked)
 {
-	m_bCaseSensitive = checked;
+	m_isCaseSensitive = checked;
 
-	if (!m_pCompleterSearch)
+	if (!m_completerSearch)
 		return;
 
-	if (m_bCaseSensitive)
-		m_pCompleterSearch->setCaseSensitivity(Qt::CaseSensitive);
+	if (m_isCaseSensitive)
+		m_completerSearch->setCaseSensitivity(Qt::CaseSensitive);
 	else
-		m_pCompleterSearch->setCaseSensitivity(Qt::CaseInsensitive);
+		m_completerSearch->setCaseSensitivity(Qt::CaseInsensitive);
 }
 
 void MainWindow::slotEditSearchReturnPressed()
 {
-	QString searchText = m_pLineEditSearch->text();
+	QString searchText = m_lineEditSearch->text();
 
 	if  (!m_currSearchIndex.isValid())
 	{
-		m_currSearchIndex = m_pTreeModel->index(0, 0, QModelIndex());
+		m_currSearchIndex = m_treeModel->index(0, 0, QModelIndex());
 		search(m_currSearchIndex,searchText);
 	}
 	else
@@ -907,10 +907,10 @@ void MainWindow::slotEditSearchReturnPressed()
 					found = true;
 					break;
 				}
-				if (node != m_pTreeModel->index(0, 0, QModelIndex()))
+				if (node != m_treeModel->index(0, 0, QModelIndex()))
 					sibling = node.sibling(node.row() + 1,node.column());
 				else
-					sibling = m_pTreeModel->index(0, 0, QModelIndex());
+					sibling = m_treeModel->index(0, 0, QModelIndex());
 			}
 			if (found)
 				break;
@@ -922,17 +922,17 @@ void MainWindow::slotEditSearchReturnPressed()
 
 bool MainWindow::search(const QModelIndex &index,const QString &name)
 {
-	m_currSearchIndex = m_pTreeModel->searchForName(name,index);
+	m_currSearchIndex = m_treeModel->searchForName(name,index);
 	if (m_currSearchIndex.isValid())
 	{
-		m_pTreeView->setCurrentIndex(m_currSearchIndex);
-		m_pTreeView->scrollTo(m_currSearchIndex,QAbstractItemView::EnsureVisible);
-		m_pTreeView->resizeColumnToContents(0);
+		m_treeView->setCurrentIndex(m_currSearchIndex);
+		m_treeView->scrollTo(m_currSearchIndex,QAbstractItemView::EnsureVisible);
+		m_treeView->resizeColumnToContents(0);
 
 		//widgetProperties->displayProperties(curritf);
 
 		slotTreeNodeSelected(m_currSearchIndex);
-		m_pSceneView->centerOnNode(reinterpret_cast<osg::Node*>(m_currSearchIndex.internalPointer()));
+		m_sceneView->centerOnNode(reinterpret_cast<osg::Node*>(m_currSearchIndex.internalPointer()));
 		return true;
 	}
 	return false;
