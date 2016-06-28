@@ -45,6 +45,7 @@
 #include <QtGui/QGridLayout>
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
+#include <osgDB/FileUtils>
 #include "xSceneView.h"
 #include "xSceneModel.h"
 #include "xTreeModel.h"
@@ -60,7 +61,7 @@
 //#include "BookmarkDialog.h"
 //#include "PosterImageDialog.h"
 //#include "AboutDialog.h"
-
+#include "xShaderSettingDialog.h"
 //#include "MiscFunctions.h"
 //
 #include "xFindNameListVisitor.h"
@@ -217,11 +218,54 @@ void MainWindow::on_actionSave_As_triggered()
 }
 void MainWindow::on_actionLoad_Shader_triggered()
 {
+	xShaderSettingDialog *shaderSetting = new xShaderSettingDialog(this);
+	if (shaderSetting != NULL)
+	{
+		if (shaderSetting->exec() != QDialog::Accepted)
+			return;
+		QString vertShaderFile = shaderSetting->getVertexShaderPath();
+		QString fragmentShaderFile = shaderSetting->getFragmentShaderPath();
 
+		osg::Shader *vertShader = new osg::Shader(osg::Shader::VERTEX);
+		std::string vertShaderSource = osgDB::findDataFile(vertShaderFile.toStdString());
+
+		bool success = vertShader->loadShaderSourceFromFile(vertShaderSource);
+		if (!success)
+		{
+			xLogHandler::getInstance()->slotReportError(tr("Couldn't load file: %1 ...").arg(vertShaderFile));
+			return;
+		}
+
+		osg::Shader *fragShader = new osg::Shader(osg::Shader::FRAGMENT);
+		std::string fragShaderSource = osgDB::findDataFile(fragmentShaderFile.toStdString());
+		success = fragShader->loadShaderSourceFromFile(fragShaderSource);
+		if (!success)
+		{
+			xLogHandler::getInstance()->slotReportError(tr("Couldn't load file: %1 ...").arg(fragmentShaderFile));
+			return;
+		}
+
+		osg::ref_ptr<osg::Program> program = new osg::Program;
+		program->setName("userShading");
+
+		program->addShader(vertShader);
+		program->addShader(fragShader);
+		
+		osg::ref_ptr<osg::StateSet> stateSet = m_sceneModel->getScene()->getOrCreateStateSet();
+		if (stateSet.valid())
+			stateSet->setAttributeAndModes(program.get(), osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+	}
 }
+
 void MainWindow::on_actionRemove_Shader_triggered()
 {
-
+	if (m_sceneModel->getScene() != NULL)
+	{
+		osg::ref_ptr<osg::StateSet> stateSet = m_sceneModel->getScene()->getOrCreateStateSet();
+		if (stateSet.valid())
+			stateSet->removeAttribute(osg::StateAttribute::PROGRAM);
+	}
+	
 }
 bool MainWindow::loadFile(const QString &file)
 {
